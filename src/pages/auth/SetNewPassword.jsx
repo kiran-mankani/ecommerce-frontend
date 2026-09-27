@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { FiHome } from "react-icons/fi";
+import { FiLock, FiHome } from "react-icons/fi";
 import {
   HiOutlineShieldCheck,
   HiOutlineTruck,
@@ -10,56 +9,68 @@ import {
 import toast from "react-hot-toast";
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
-import { verifyOtpThunk } from "../../store/slices/authSlice";
-import { resendOtpApi } from "../../services/authService";
-import useAuth from "../../hooks/useAuth";
+import { resetPasswordApi } from "../../services/authService";
 
-const VerifyOtp = () => {
+const SetNewPassword = () => {
   const [params] = useSearchParams();
   const emailFromQuery = params.get("email") || "";
-  const dispatch = useDispatch();
+  const otpFromQuery = params.get("otp") || "";
   const navigate = useNavigate();
-  const { loading } = useAuth();
 
-  const [otp, setOtp] = useState("");
-  const [error, setError] = useState("");
-  const [resending, setResending] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!emailFromQuery) {
-      toast.error("Email missing. Please signup again.");
-      navigate("/signup");
+    if (!emailFromQuery || !otpFromQuery) {
+      toast.error("Session expired. Please start over.");
+      navigate("/forgot-password");
     }
-  }, [emailFromQuery, navigate]);
+  }, [emailFromQuery, otpFromQuery, navigate]);
+
+  const validate = () => {
+    const e = {};
+
+    const STRONG_PASSWORD_REGEX =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_+\-=[\]\\;'`~]).{8,}$/;
+
+    if (!newPassword) e.newPassword = "New password is required";
+    else if (!STRONG_PASSWORD_REGEX.test(newPassword))
+      e.newPassword =
+        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character";
+
+    if (newPassword !== confirmPassword)
+      e.confirmPassword = "Passwords do not match";
+
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!otp || otp.length !== 6) {
-      setError("Enter a 6-digit OTP");
-      return;
-    }
+    if (!validate()) return;
 
-    const result = await dispatch(
-      verifyOtpThunk({ email: emailFromQuery, otp })
-    );
-
-    if (verifyOtpThunk.fulfilled.match(result)) {
-      toast.success("Email verified! Please login.");
-      navigate("/login");
-    } else {
-      toast.error(result.payload || "Verification failed");
-    }
-  };
-
-  const handleResend = async () => {
     try {
-      setResending(true);
-      await resendOtpApi({ email: emailFromQuery });
-      toast.success("OTP resent to your email");
+      setLoading(true);
+      await resetPasswordApi({
+        email: emailFromQuery,
+        otp: otpFromQuery,
+        newPassword,
+      });
+      toast.success("Password reset successful. Please login.");
+      navigate("/login");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to resend OTP");
+      const msg = err.response?.data?.message || "Reset failed";
+      toast.error(msg);
+      if (
+        msg.toLowerCase().includes("otp") ||
+        msg.toLowerCase().includes("expired")
+      ) {
+        navigate(`/reset-password?email=${encodeURIComponent(emailFromQuery)}`);
+      }
     } finally {
-      setResending(false);
+      setLoading(false);
     }
   };
 
@@ -68,7 +79,7 @@ const VerifyOtp = () => {
       className="flex min-h-screen flex-col"
       style={{ backgroundColor: "var(--color-surface-alt)" }}
     >
-      {/* ================= TOP BAR ================= */}
+      {/* TOP BAR */}
       <header
         className="flex items-center justify-between px-6 py-4 md:px-10"
         style={{ backgroundColor: "var(--color-surface)" }}
@@ -78,7 +89,6 @@ const VerifyOtp = () => {
             ecommerce
           </span>
         </Link>
-
         <Link
           to="/"
           className="flex items-center gap-2 text-sm font-medium transition hover:opacity-70"
@@ -89,13 +99,13 @@ const VerifyOtp = () => {
         </Link>
       </header>
 
-      {/* ================= MAIN CARD ================= */}
+      {/* MAIN */}
       <main className="flex flex-1 items-center justify-center px-4 py-8 md:px-10">
         <div
           className="grid w-full max-w-5xl overflow-hidden rounded-2xl shadow-xl md:grid-cols-2"
           style={{ backgroundColor: "var(--color-surface)" }}
         >
-          {/* ---------- LEFT: BRAND PANEL ---------- */}
+          {/* LEFT: BRAND PANEL */}
           <aside className="relative hidden flex-col justify-between bg-gradient-to-br from-blue-800 to-blue-600 p-8 text-white md:flex md:p-10">
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
               <div className="absolute -left-16 -top-16 h-56 w-56 rounded-full bg-white/5" />
@@ -107,10 +117,10 @@ const VerifyOtp = () => {
                 ecommerce
               </span>
               <h2 className="mt-8 text-3xl font-bold leading-tight">
-                Almost There!
+                Step 2 of 2
               </h2>
               <p className="mt-2 max-w-xs text-sm text-white/80">
-                Verify your email and unlock your shopping experience.
+                Almost done — choose a new password to secure your account.
               </p>
 
               <div className="mt-10 flex items-center justify-center">
@@ -193,62 +203,119 @@ const VerifyOtp = () => {
             </ul>
           </aside>
 
-          {/* ---------- RIGHT: FORM ---------- */}
+          {/* RIGHT: FORM */}
           <section className="p-6 sm:p-8 md:p-10">
+            {/* Progress */}
+            <div className="mb-6 flex items-center gap-2 text-xs">
+              <span
+                className="flex h-6 w-6 items-center justify-center rounded-full text-white"
+                style={{ backgroundColor: "var(--color-success)" }}
+              >
+                ✓
+              </span>
+              <span style={{ color: "var(--color-text-muted)" }}>
+                Verify OTP
+              </span>
+              <span
+                className="h-px flex-1"
+                style={{ backgroundColor: "var(--color-divider)" }}
+              />
+              <span
+                className="flex h-6 w-6 items-center justify-center rounded-full text-white"
+                style={{ backgroundColor: "var(--color-primary)" }}
+              >
+                2
+              </span>
+              <span
+                className="font-semibold"
+                style={{ color: "var(--color-text)" }}
+              >
+                New Password
+              </span>
+            </div>
+
             <h1
               className="text-2xl font-bold"
               style={{ color: "var(--color-text)" }}
             >
-              Verify Email
+              Set New Password
             </h1>
             <p
               className="mt-1 text-sm"
               style={{ color: "var(--color-text-muted)" }}
             >
-              We sent a 6-digit OTP to{" "}
-              <span style={{ color: "var(--color-text)", fontWeight: 600 }}>
-                {emailFromQuery}
-              </span>
+              Choose a strong password for your account.
             </p>
 
-            <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-              <Input
-                label="Enter OTP"
-                name="otp"
-                placeholder="1 2 3 4 5 6"
-                value={otp}
-                maxLength={6}
-                onChange={(e) => {
-                  setOtp(e.target.value.replace(/\D/g, ""));
-                  if (error) setError("");
-                }}
-                error={error}
-                className="text-center text-lg tracking-[0.5em]"
-              />
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              {/* New Password */}
+              <div className="relative">
+                <FiLock
+                  className="absolute left-3 top-[42px] z-10"
+                  style={{ color: "var(--color-text-muted)" }}
+                />
+                <Input
+                  label="New Password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={newPassword}
+                  onChange={(e) => {
+                    setNewPassword(e.target.value);
+                    if (errors.newPassword)
+                      setErrors({ ...errors, newPassword: "" });
+                  }}
+                  error={errors.newPassword}
+                  className="pl-10"
+                />
+                <p
+                  className="mt-1 text-xs"
+                  style={{ color: "var(--color-text-muted)" }}
+                >
+                  Min 8 characters with uppercase, lowercase, number, and
+                  special character
+                </p>
+              </div>
+
+              {/* Confirm New Password */}
+              <div className="relative">
+                <FiLock
+                  className="absolute left-3 top-[42px] z-10"
+                  style={{ color: "var(--color-text-muted)" }}
+                />
+                <Input
+                  label="Confirm New Password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (errors.confirmPassword)
+                      setErrors({ ...errors, confirmPassword: "" });
+                  }}
+                  error={errors.confirmPassword}
+                  className="pl-10"
+                />
+              </div>
 
               <Button type="submit" loading={loading} className="w-full">
-                Verify
+                Reset Password
               </Button>
             </form>
 
-            <div className="mt-6 flex items-center justify-between text-sm">
-              <button
-                type="button"
-                onClick={handleResend}
-                disabled={resending}
-                className="font-semibold hover:underline disabled:opacity-60"
+            <p
+              className="mt-6 text-center text-sm"
+              style={{ color: "var(--color-text-muted)" }}
+            >
+              <Link
+                to={`/reset-password?email=${encodeURIComponent(
+                  emailFromQuery
+                )}`}
+                className="font-semibold hover:underline"
                 style={{ color: "var(--color-primary)" }}
               >
-                {resending ? "Resending..." : "Resend OTP"}
-              </button>
-              <Link
-                to="/signup"
-                className="hover:underline"
-                style={{ color: "var(--color-text-muted)" }}
-              >
-                Change email
+                ← Back to OTP
               </Link>
-            </div>
+            </p>
           </section>
         </div>
       </main>
@@ -256,4 +323,4 @@ const VerifyOtp = () => {
   );
 };
 
-export default VerifyOtp;
+export default SetNewPassword;

@@ -23,9 +23,7 @@ export const signupThunk = createAsyncThunk(
     try {
       return await signupApi(payload);
     } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.message || "Signup failed"
-      );
+      return rejectWithValue(err.response?.data?.message || "Signup failed");
     }
   }
 );
@@ -88,6 +86,13 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    hydrateAuth: (state, action) => {
+      const user = action.payload;
+      const token = localStorage.getItem("token");
+      state.user = user || null;
+      state.token = token || null;
+      state.isAuthenticated = !!token;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -143,5 +148,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, logout, clearError } = authSlice.actions;
+export const { setCredentials, logout, clearError, hydrateAuth } =
+  authSlice.actions;
 export default authSlice.reducer;
