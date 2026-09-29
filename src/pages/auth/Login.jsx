@@ -70,7 +70,6 @@ const Login = () => {
       className="flex min-h-screen flex-col"
       style={{ backgroundColor: "var(--color-surface-alt)" }}
     >
-      {/* ================= TOP BAR ================= */}
       <header
         className="flex items-center justify-between px-6 py-4 md:px-10"
         style={{ backgroundColor: "var(--color-surface)" }}
@@ -94,13 +93,11 @@ const Login = () => {
         </Link>
       </header>
 
-      {/* ================= MAIN CARD ================= */}
       <main className="flex flex-1 items-center justify-center px-4 py-8 md:px-10">
         <div
           className="grid w-full max-w-5xl overflow-hidden rounded-2xl shadow-xl md:grid-cols-2"
           style={{ backgroundColor: "var(--color-surface)" }}
         >
-          {/* ---------- LEFT: BRAND PANEL ---------- */}
           <aside
             className="relative hidden flex-col justify-between p-8 text-white md:flex md:p-10"
             style={{
@@ -108,7 +105,6 @@ const Login = () => {
                 "linear-gradient(160deg, var(--color-brand-gradient-start) 0%, var(--color-brand-gradient-end) 100%)",
             }}
           >
-            {/* Decorative circles */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
               <div className="absolute -left-16 -top-16 h-56 w-56 rounded-full bg-white/5" />
               <div className="absolute -bottom-24 -right-16 h-72 w-72 rounded-full bg-white/5" />
@@ -118,7 +114,6 @@ const Login = () => {
               <span className="text-2xl font-bold tracking-tight">
                 ecommerce
               </span>
-
               <h2 className="mt-8 text-3xl font-bold leading-tight">
                 Welcome Back!
               </h2>
@@ -127,7 +122,6 @@ const Login = () => {
                 products.
               </p>
 
-              {/* Illustration placeholder (shopping cart) */}
               <div className="mt-10 flex items-center justify-center">
                 <div className="relative">
                   <div className="absolute inset-0 -z-10 rounded-full bg-white/10 blur-2xl" />
@@ -137,64 +131,22 @@ const Login = () => {
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <rect
-                      x="30"
-                      y="50"
-                      width="140"
-                      height="90"
-                      rx="10"
-                      fill="#ffffff"
-                      opacity="0.15"
-                    />
-                    <rect
-                      x="40"
-                      y="30"
-                      width="30"
-                      height="30"
-                      rx="4"
-                      fill="#fbbf24"
-                    />
-                    <rect
-                      x="85"
-                      y="25"
-                      width="30"
-                      height="30"
-                      rx="4"
-                      fill="#3b82f6"
-                    />
+                    <rect x="30" y="50" width="140" height="90" rx="10" fill="#ffffff" opacity="0.15" />
+                    <rect x="40" y="30" width="30" height="30" rx="4" fill="#fbbf24" />
+                    <rect x="85" y="25" width="30" height="30" rx="4" fill="#3b82f6" />
                     <circle cx="90" cy="120" r="10" fill="#ffffff" />
                     <circle cx="140" cy="120" r="10" fill="#ffffff" />
-                    <path
-                      d="M55 70 L65 70 L75 110 L150 110 L160 80 L80 80"
-                      stroke="#ffffff"
-                      strokeWidth="4"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                    <path d="M55 70 L65 70 L75 110 L150 110 L160 80 L80 80" stroke="#ffffff" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
               </div>
             </div>
 
-            {/* Feature list */}
             <ul className="relative z-10 mt-10 space-y-4">
               {[
-                {
-                  icon: <HiOutlineShieldCheck size={20} />,
-                  title: "Best Quality Products",
-                  desc: "Top brands & great prices",
-                },
-                {
-                  icon: <HiOutlineTruck size={20} />,
-                  title: "Fast & Secure Delivery",
-                  desc: "Track your orders easily",
-                },
-                {
-                  icon: <HiOutlineSupport size={20} />,
-                  title: "24/7 Customer Support",
-                  desc: "We're always here to help",
-                },
+                { icon: <HiOutlineShieldCheck size={20} />, title: "Best Quality Products", desc: "Top brands & great prices" },
+                { icon: <HiOutlineTruck size={20} />, title: "Fast & Secure Delivery", desc: "Track your orders easily" },
+                { icon: <HiOutlineSupport size={20} />, title: "24/7 Customer Support", desc: "We're always here to help" },
               ].map((f, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15">
@@ -209,16 +161,14 @@ const Login = () => {
             </ul>
           </aside>
 
-          {/* ---------- RIGHT: FORM PANEL ---------- */}
           <section className="p-6 sm:p-8 md:p-10">
-            {/* Tabs */}
             <div
               className="mb-8 flex border-b"
               style={{ borderColor: "var(--color-divider)" }}
             >
               <button
                 type="button"
-                className="relative pb-3 px-4 text-sm font-semibold"
+                className="relative px-4 pb-3 text-sm font-semibold"
                 style={{ color: "var(--color-tab-active)" }}
               >
                 Login
@@ -229,14 +179,13 @@ const Login = () => {
               </button>
               <Link
                 to="/signup"
-                className="pb-3 px-4 text-sm font-medium transition hover:opacity-80"
+                className="px-4 pb-3 text-sm font-medium transition hover:opacity-80"
                 style={{ color: "var(--color-tab-inactive)" }}
               >
                 Sign Up
               </Link>
             </div>
 
-            {/* Heading */}
             <h1
               className="text-2xl font-bold"
               style={{ color: "var(--color-text)" }}
@@ -250,9 +199,7 @@ const Login = () => {
               Enter your email and password to continue.
             </p>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-              {/* Email */}
               <div>
                 <label
                   className="mb-1.5 block text-xs font-semibold"
@@ -284,16 +231,12 @@ const Login = () => {
                   />
                 </div>
                 {errors.email && (
-                  <p
-                    className="mt-1 text-xs"
-                    style={{ color: "var(--color-danger)" }}
-                  >
+                  <p className="mt-1 text-xs" style={{ color: "var(--color-danger)" }}>
                     {errors.email}
                   </p>
                 )}
               </div>
 
-              {/* Password */}
               <div>
                 <label
                   className="mb-1.5 block text-xs font-semibold"
@@ -328,22 +271,18 @@ const Login = () => {
                     onClick={() => setShowPassword((s) => !s)}
                     className="absolute right-3 top-1/2 -translate-y-1/2"
                     style={{ color: "var(--color-text-muted)" }}
-                    aria-label="Toggle password visibility"
+                    aria-label="Toggle password"
                   >
-                    {showPassword ? <FiEye size={16} /> : <FiEyeOff size={16} />}
+                    {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                   </button>
                 </div>
                 {errors.password && (
-                  <p
-                    className="mt-1 text-xs"
-                    style={{ color: "var(--color-danger)" }}
-                  >
+                  <p className="mt-1 text-xs" style={{ color: "var(--color-danger)" }}>
                     {errors.password}
                   </p>
                 )}
               </div>
 
-              {/* Remember + Forgot */}
               <div className="flex items-center justify-between">
                 <label className="flex cursor-pointer items-center gap-2 text-xs">
                   <input
@@ -351,12 +290,10 @@ const Login = () => {
                     name="remember"
                     checked={formData.remember}
                     onChange={handleChange}
-                    className="h-4 w-4 rounded border-gray-300 accent-blue-600"
+                    className="h-4 w-4 rounded border-gray-300"
                     style={{ accentColor: "var(--color-check-bg)" }}
                   />
-                  <span style={{ color: "var(--color-text)" }}>
-                    Remember me
-                  </span>
+                  <span style={{ color: "var(--color-text)" }}>Remember me</span>
                 </label>
 
                 <Link
@@ -368,7 +305,6 @@ const Login = () => {
                 </Link>
               </div>
 
-              {/* Submit */}
               <button
                 type="submit"
                 disabled={loading}
@@ -381,31 +317,16 @@ const Login = () => {
                     Logging in...
                   </>
                 ) : (
-                  <>
-                    Login <span aria-hidden>→</span>
-                  </>
+                  <>Login <span aria-hidden>→</span></>
                 )}
               </button>
 
-              {/* OR divider */}
               <div className="flex items-center gap-3">
-                <span
-                  className="h-px flex-1"
-                  style={{ backgroundColor: "var(--color-divider)" }}
-                />
-                <span
-                  className="text-xs font-medium"
-                  style={{ color: "var(--color-text-muted)" }}
-                >
-                  OR
-                </span>
-                <span
-                  className="h-px flex-1"
-                  style={{ backgroundColor: "var(--color-divider)" }}
-                />
+                <span className="h-px flex-1" style={{ backgroundColor: "var(--color-divider)" }} />
+                <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>OR</span>
+                <span className="h-px flex-1" style={{ backgroundColor: "var(--color-divider)" }} />
               </div>
 
-              {/* Google */}
               <button
                 type="button"
                 onClick={() => toast("Google login coming soon")}
@@ -421,11 +342,7 @@ const Login = () => {
               </button>
             </form>
 
-            {/* Footer */}
-            <p
-              className="mt-6 text-center text-xs"
-              style={{ color: "var(--color-text-muted)" }}
-            >
+            <p className="mt-6 text-center text-xs" style={{ color: "var(--color-text-muted)" }}>
               Don't have an account?{" "}
               <Link
                 to="/signup"

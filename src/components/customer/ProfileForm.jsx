@@ -17,6 +17,7 @@ const ProfileForm = ({ initialData }) => {
     city: "",
     country: "",
     profileImage: "",
+    bio: "",
   });
 
   useEffect(() => {
@@ -27,6 +28,7 @@ const ProfileForm = ({ initialData }) => {
         city: initialData.profile.city || "",
         country: initialData.profile.country || "",
         profileImage: initialData.profile.profileImage || "",
+        bio: initialData.profile.bio || "",
       });
     }
   }, [initialData]);
@@ -47,8 +49,11 @@ const ProfileForm = ({ initialData }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="card space-y-4"
-      style={{ backgroundColor: "var(--color-surface)" }}
+      className="space-y-5 rounded-xl border p-6"
+      style={{
+        backgroundColor: "var(--color-surface)",
+        borderColor: "var(--color-border)",
+      }}
     >
       <h3
         className="text-base font-bold"
@@ -132,6 +137,35 @@ const ProfileForm = ({ initialData }) => {
           onChange={handleChange}
           className="pl-10"
         />
+      </div>
+
+      <div>
+        <label
+          className="mb-1.5 block text-sm font-medium"
+          style={{ color: "var(--color-text)" }}
+        >
+          Bio
+        </label>
+        <textarea
+          name="bio"
+          value={form.bio}
+          onChange={handleChange}
+          rows={4}
+          maxLength={500}
+          placeholder="Tell us about yourself..."
+          className="w-full resize-none rounded-lg border px-4 py-2.5 text-sm outline-none transition focus:ring-2"
+          style={{
+            backgroundColor: "var(--color-input-bg)",
+            borderColor: "var(--color-input-border)",
+            color: "var(--color-text)",
+          }}
+        />
+        <p
+          className="mt-1 text-right text-xs"
+          style={{ color: "var(--color-text-muted)" }}
+        >
+          {form.bio.length}/500
+        </p>
       </div>
 
       <div className="flex justify-end pt-2">

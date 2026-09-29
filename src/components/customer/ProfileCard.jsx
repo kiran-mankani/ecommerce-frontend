@@ -1,13 +1,13 @@
-import ProfileAvatar from "./ProfileAvatar";
+import AvatarUploader from "./AvatarUploader";
 
 const ProfileCard = ({ user }) => {
   return (
     <div className="card flex flex-col items-center gap-3 text-center">
-      <ProfileAvatar
+      <AvatarUploader
         name={user?.name}
         image={user?.profile?.profileImage}
-        size={96}
       />
+
       <div>
         <h3
           className="text-lg font-bold"
@@ -16,9 +16,10 @@ const ProfileCard = ({ user }) => {
           {user?.name || "Customer"}
         </h3>
         <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-          {user?.email}
+          {user?.email || ""}
         </p>
       </div>
+
       <span
         className="rounded-full px-3 py-1 text-xs font-semibold capitalize"
         style={{
@@ -26,7 +27,7 @@ const ProfileCard = ({ user }) => {
           color: "var(--color-primary)",
         }}
       >
-        {user?.role}
+        {user?.role || "customer"}
       </span>
     </div>
   );

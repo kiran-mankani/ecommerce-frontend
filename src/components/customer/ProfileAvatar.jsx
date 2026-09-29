@@ -11,7 +11,7 @@ const ProfileAvatar = ({ name = "", image = "", size = 96 }) => {
     return (
       <img
         src={image}
-        alt={name}
+        alt={name || "user"}
         style={{ width: size, height: size }}
         className="rounded-full border-2 object-cover"
       />

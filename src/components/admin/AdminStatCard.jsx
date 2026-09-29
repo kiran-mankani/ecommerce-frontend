@@ -1,13 +1,43 @@
-// src/components/admin/AdminStatCard.jsx
-const AdminStatCard = ({ title, value, icon, color = "blue" }) => {
+const AdminStatCard = ({ label, value, icon: Icon, accent = "primary" }) => {
+  const accentColor = {
+    primary: "var(--color-primary)",
+    success: "var(--color-success)",
+    warning: "var(--color-warning)",
+    danger: "var(--color-danger)",
+  }[accent];
+
   return (
-    <div className={`bg-white rounded-lg shadow p-4 border-l-4 border-${color}-500`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-gray-500">{title}</p>
-          <p className="text-2xl font-bold text-gray-800">{value}</p>
-        </div>
-        {icon && <div className="text-3xl">{icon}</div>}
+    <div
+      className="flex items-center gap-4 rounded-xl border p-5 shadow-sm"
+      style={{
+        backgroundColor: "var(--color-surface)",
+        borderColor: "var(--color-border)",
+      }}
+    >
+      {Icon && (
+        <span
+          className="flex h-12 w-12 items-center justify-center rounded-full"
+          style={{
+            backgroundColor: "rgba(37, 99, 235, 0.1)",
+            color: accentColor,
+          }}
+        >
+          <Icon size={22} />
+        </span>
+      )}
+      <div>
+        <p
+          className="text-xs font-medium uppercase tracking-wide"
+          style={{ color: "var(--color-text-muted)" }}
+        >
+          {label}
+        </p>
+        <p
+          className="mt-0.5 text-2xl font-bold"
+          style={{ color: "var(--color-text)" }}
+        >
+          {value}
+        </p>
       </div>
     </div>
   );

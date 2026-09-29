@@ -14,9 +14,15 @@ import Profile from "../pages/customer/Profile";
 import AdminDashboard from "../pages/admin/Dashboard";
 import Categories from "../pages/admin/Categories";
 import Products from "../pages/admin/Products";
+import AdminOrders from "../pages/admin/AdminOrders";
+import AdminOrderDetail from "../pages/admin/AdminOrderDetail";
 import Home from "../pages/shop/Home";
 import ProductDetail from "../pages/shop/ProductDetail";
 import Cart from "../pages/shop/Cart";
+import Checkout from "../pages/shop/Checkout";
+import OrderSuccess from "../pages/shop/OrderSuccess";
+import MyOrders from "../pages/shop/MyOrders";
+import OrderDetail from "../pages/shop/OrderDetail";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useSelector((s) => s.auth);
@@ -37,7 +43,21 @@ const AppRoutes = () => {
       <Route element={<ShopLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/product/:id" element={<ProductDetail />} />
+      </Route>
+
+      {/* Cart + Orders (require login) */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <ShopLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/order-success/:id" element={<OrderSuccess />} />
+        <Route path="/orders" element={<MyOrders />} />
+        <Route path="/order/:id" element={<OrderDetail />} />
       </Route>
 
       {/* Public auth */}
@@ -50,7 +70,7 @@ const AppRoutes = () => {
         <Route path="/set-new-password" element={<SetNewPassword />} />
       </Route>
 
-      {/* Customer */}
+      {/* Customer profile */}
       <Route
         element={
           <ProtectedRoute>
@@ -72,6 +92,8 @@ const AppRoutes = () => {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/categories" element={<Categories />} />
         <Route path="/admin/products" element={<Products />} />
+        <Route path="/admin/orders" element={<AdminOrders />} />
+        <Route path="/admin/orders/:id" element={<AdminOrderDetail />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

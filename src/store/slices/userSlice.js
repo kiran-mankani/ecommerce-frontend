@@ -3,6 +3,7 @@ import {
   getProfileApi,
   updateProfileApi,
   changePasswordApi,
+  uploadAvatarApi,
 } from "../../services/userService";
 
 export const fetchProfileThunk = createAsyncThunk(
@@ -11,7 +12,9 @@ export const fetchProfileThunk = createAsyncThunk(
     try {
       return await getProfileApi();
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to load profile");
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to load profile"
+      );
     }
   }
 );
@@ -22,7 +25,9 @@ export const updateProfileThunk = createAsyncThunk(
     try {
       return await updateProfileApi(payload);
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to update profile");
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to update profile"
+      );
     }
   }
 );
@@ -33,7 +38,22 @@ export const changePasswordThunk = createAsyncThunk(
     try {
       return await changePasswordApi(payload);
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to change password");
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to change password"
+      );
+    }
+  }
+);
+
+export const uploadAvatarThunk = createAsyncThunk(
+  "user/uploadAvatar",
+  async (file, { rejectWithValue }) => {
+    try {
+      return await uploadAvatarApi(file);
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to upload avatar"
+      );
     }
   }
 );
@@ -57,7 +77,6 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // FETCH
       .addCase(fetchProfileThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -70,7 +89,7 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // UPDATE
+
       .addCase(updateProfileThunk.pending, (state) => {
         state.saving = true;
         state.error = null;
@@ -85,7 +104,7 @@ const userSlice = createSlice({
         state.saving = false;
         state.error = action.payload;
       })
-      // CHANGE PASSWORD
+
       .addCase(changePasswordThunk.pending, (state) => {
         state.saving = true;
         state.error = null;
@@ -96,6 +115,20 @@ const userSlice = createSlice({
         state.successMessage = "Password changed successfully";
       })
       .addCase(changePasswordThunk.rejected, (state, action) => {
+        state.saving = false;
+        state.error = action.payload;
+      })
+
+      .addCase(uploadAvatarThunk.pending, (state) => {
+        state.saving = true;
+        state.error = null;
+      })
+      .addCase(uploadAvatarThunk.fulfilled, (state, action) => {
+        state.saving = false;
+        state.profile = action.payload.data;
+        state.successMessage = "Avatar updated";
+      })
+      .addCase(uploadAvatarThunk.rejected, (state, action) => {
         state.saving = false;
         state.error = action.payload;
       });

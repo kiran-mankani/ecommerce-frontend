@@ -1,65 +1,75 @@
-import { useState } from "react";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import useProfile from "../../hooks/useProfile";
+import { fetchProfileThunk } from "../../store/slices/userSlice";
+import Loader from "../../components/common/Loader";
+import ErrorState from "../../components/common/ErrorState";
+import ProfileCard from "../../components/customer/ProfileCard";
+import ProfileForm from "../../components/customer/ProfileForm";
+import ChangePasswordForm from "../../components/customer/ChangePasswordForm";
 
-const ProductImageGallery = ({ images = [], alt = "" }) => {
-  const [active, setActive] = useState(0);
+const Profile = () => {
+  const dispatch = useDispatch();
+  const { profile, loading, error } = useProfile();
 
-  if (!images || images.length === 0) {
+  useEffect(() => {
+    dispatch(fetchProfileThunk());
+  }, [dispatch]);
+
+  if (loading && !profile) return <Loader size="lg" />;
+  if (error && !profile)
     return (
-      <div
-        className="flex aspect-square w-full items-center justify-center rounded-xl border text-4xl font-bold"
-        style={{
-          backgroundColor: "rgba(37, 99, 235, 0.08)",
-          borderColor: "var(--color-border)",
-          color: "var(--color-primary)",
-        }}
-      >
-        {alt?.[0]?.toUpperCase() || "?"}
-      </div>
+      <ErrorState
+        message={error}
+        onRetry={() => dispatch(fetchProfileThunk())}
+      />
     );
-  }
+
+  if (!profile) return <Loader size="lg" />;
 
   return (
-    <div className="space-y-3">
-      <div
-        className="aspect-square w-full overflow-hidden rounded-xl border"
-        style={{
-          backgroundColor: "var(--color-surface-alt)",
-          borderColor: "var(--color-border)",
-        }}
-      >
-        <img
-          src={images[active]}
-          alt={alt}
-          className="h-full w-full object-cover"
-        />
+    <div className="space-y-6">
+      <div>
+        <h1
+          className="text-2xl font-bold"
+          style={{ color: "var(--color-text)" }}
+        >
+          My Profile
+        </h1>
+        <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+          Manage your account information
+        </p>
       </div>
 
-      {images.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto">
-          {images.map((url, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setActive(i)}
-              className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition"
-              style={{
-                borderColor:
-                  i === active
-                    ? "var(--color-primary)"
-                    : "var(--color-border)",
-              }}
+      <div className="grid gap-6 md:grid-cols-[280px_1fr]">
+        <ProfileCard user={profile} />
+
+        <div className="space-y-6">
+          <ProfileForm initialData={profile} />
+
+          <div className="pt-2">
+            <div
+              className="mb-4 flex items-center gap-3"
+              style={{ color: "var(--color-text)" }}
             >
-              <img
-                src={url}
-                alt={`${alt} ${i + 1}`}
-                className="h-full w-full object-cover"
+              <h2 className="text-lg font-bold">Settings</h2>
+              <span
+                className="h-px flex-1"
+                style={{ backgroundColor: "var(--color-divider)" }}
               />
-            </button>
-          ))}
+            </div>
+            <p
+              className="mb-4 text-sm"
+              style={{ color: "var(--color-text-muted)" }}
+            >
+              Update your password to keep your account secure.
+            </p>
+            <ChangePasswordForm />
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
-export default ProductImageGallery;
+export default Profile;

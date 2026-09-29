@@ -30,7 +30,7 @@ const Cart = () => {
   };
 
   const handleCheckout = () => {
-    toast("Checkout is coming in Phase 9.", { icon: "🛒" });
+    navigate("/checkout");
   };
 
   if (loading && items.length === 0) return <Loader size="lg" />;

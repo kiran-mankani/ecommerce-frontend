@@ -7,6 +7,7 @@ import {
   FiUsers,
   FiPackage,
   FiTag,
+  FiShoppingBag,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { logoutThunk } from "../store/slices/authSlice";
@@ -15,6 +16,7 @@ const navItems = [
   { to: "/admin", label: "Dashboard", icon: FiGrid, end: true },
   { to: "/admin/categories", label: "Categories", icon: FiTag },
   { to: "/admin/products", label: "Products", icon: FiPackage },
+  { to: "/admin/orders", label: "Orders", icon: FiShoppingBag },
   { to: "/admin/users", label: "Users", icon: FiUsers, disabled: true },
 ];
 
