@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { FiArrowLeft, FiTrash2 } from "react-icons/fi";
+import { FiArrowLeft, FiTrash2, FiAlertTriangle } from "react-icons/fi";
 import toast from "react-hot-toast";
 import useCart from "../../hooks/useCart";
 import {
@@ -30,6 +30,16 @@ const Cart = () => {
   };
 
   const handleCheckout = () => {
+    const hasOutOfStock = items.some((it) => it.stock <= 0);
+    if (hasOutOfStock) {
+      toast.error("Remove out-of-stock items before checkout");
+      return;
+    }
+    const overStock = items.some((it) => it.quantity > it.stock);
+    if (overStock) {
+      toast.error("Some items exceed available stock");
+      return;
+    }
     navigate("/checkout");
   };
 
@@ -42,17 +52,24 @@ const Cart = () => {
       />
     );
 
+  const hasIssues = items.some(
+    (it) => it.stock <= 0 || it.quantity > it.stock
+  );
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1
-            className="text-2xl font-bold"
+            className="text-xl font-bold sm:text-2xl"
             style={{ color: "var(--color-text)" }}
           >
             Your Cart
           </h1>
-          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+          <p
+            className="text-xs sm:text-sm"
+            style={{ color: "var(--color-text-muted)" }}
+          >
             {count} item{count === 1 ? "" : "s"}
           </p>
         </div>
@@ -60,7 +77,7 @@ const Cart = () => {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-sm font-medium hover:underline"
+          className="flex w-fit items-center gap-2 text-sm font-medium hover:underline"
           style={{ color: "var(--color-text-muted)" }}
         >
           <FiArrowLeft size={16} /> Continue shopping
@@ -73,9 +90,25 @@ const Cart = () => {
           message="Add some products to see them here."
         />
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-          {/* Items */}
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1fr_340px]">
           <div className="space-y-3">
+            {hasIssues && (
+              <div
+                className="flex items-start gap-2 rounded-lg border p-3 text-sm"
+                style={{
+                  backgroundColor: "rgba(239, 68, 68, 0.08)",
+                  borderColor: "rgba(239, 68, 68, 0.3)",
+                  color: "var(--color-danger)",
+                }}
+              >
+                <FiAlertTriangle size={18} className="mt-0.5 shrink-0" />
+                <p>
+                  Some items in your cart are out of stock or exceed available
+                  quantity. Remove them to continue.
+                </p>
+              </div>
+            )}
+
             {items.map((it) => (
               <CartItem key={it.productId} item={it} />
             ))}
@@ -96,9 +129,8 @@ const Cart = () => {
             </div>
           </div>
 
-          {/* Summary */}
           <aside
-            className="h-fit space-y-4 rounded-xl border p-5"
+            className="h-fit space-y-4 rounded-xl border p-4 sm:p-5"
             style={{
               backgroundColor: "var(--color-surface)",
               borderColor: "var(--color-border)",
@@ -146,7 +178,8 @@ const Cart = () => {
             <button
               type="button"
               onClick={handleCheckout}
-              className="flex w-full items-center justify-center rounded-lg py-3 text-sm font-semibold text-white shadow-sm transition hover:shadow-md"
+              disabled={hasIssues}
+              className="flex w-full items-center justify-center rounded-lg py-3 text-sm font-semibold text-white shadow-sm transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
               style={{ backgroundColor: "var(--color-primary)" }}
             >
               Proceed to Checkout

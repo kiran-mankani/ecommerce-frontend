@@ -2,10 +2,15 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
-import { FiShoppingCart, FiArrowLeft, FiMinus, FiPlus } from "react-icons/fi";
+import {
+  FiShoppingCart,
+  FiArrowLeft,
+  FiMinus,
+  FiPlus,
+  FiZap,
+} from "react-icons/fi";
 import Loader from "../../components/common/Loader";
 import ErrorState from "../../components/common/ErrorState";
-import ProductImage from "../../components/common/ProductImage";
 import PriceDisplay from "../../components/shop/PriceDisplay";
 import StockBadge from "../../components/shop/StockBadge";
 import { getProductByIdApi } from "../../services/productService";
@@ -24,6 +29,7 @@ const ProductDetail = () => {
   const [error, setError] = useState(null);
   const [activeImg, setActiveImg] = useState(0);
   const [qty, setQty] = useState(1);
+  const [adding, setAdding] = useState(false);
 
   const load = async () => {
     try {
@@ -32,6 +38,7 @@ const ProductDetail = () => {
       const res = await getProductByIdApi(id);
       setProduct(res.data);
       setActiveImg(0);
+      setQty(1);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load product");
     } finally {
@@ -44,21 +51,45 @@ const ProductDetail = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const handleAddToCart = async () => {
+  const goToCart = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to continue");
+      navigate("/login");
+      return;
+    }
+    try {
+      setAdding(true);
+      const res = await dispatch(
+        addToCartThunk({ productId: product._id, quantity: qty })
+      );
+      if (addToCartThunk.fulfilled.match(res)) {
+        navigate("/cart");
+      } else {
+        toast.error(res.payload || "Out of stock");
+      }
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const addToCart = async () => {
     if (!isAuthenticated) {
       toast.error("Please login to add items to cart");
       navigate("/login");
       return;
     }
-
-    const res = await dispatch(
-      addToCartThunk({ productId: product._id, quantity: qty })
-    );
-
-    if (addToCartThunk.fulfilled.match(res)) {
-      toast.success("Added to cart");
-    } else {
-      toast.error(res.payload || "Failed to add to cart");
+    try {
+      setAdding(true);
+      const res = await dispatch(
+        addToCartThunk({ productId: product._id, quantity: qty })
+      );
+      if (addToCartThunk.fulfilled.match(res)) {
+        toast.success("Added to cart");
+      } else {
+        toast.error(res.payload || "Out of stock");
+      }
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -67,7 +98,9 @@ const ProductDetail = () => {
   if (!product) return null;
 
   const images = product.images?.length ? product.images : [];
-  const outOfStock = product.stock <= 0;
+  const outOfStock = product.stock <= 0 || product.inStock === false;
+  const maxQty = Math.max(1, product.stock || 1);
+  const isLowStock = !outOfStock && product.stock <= 5;
 
   return (
     <div className="space-y-6">
@@ -159,7 +192,7 @@ const ProductDetail = () => {
             </p>
           )}
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <PriceDisplay
               price={product.price}
               discount={product.discount}
@@ -168,6 +201,16 @@ const ProductDetail = () => {
             <StockBadge stock={product.stock} />
           </div>
 
+          {/* Low stock warning */}
+          {isLowStock && (
+            <p
+              className="text-sm font-semibold"
+              style={{ color: "var(--color-warning)" }}
+            >
+              ⚡ Only {product.stock} left in stock — order soon!
+            </p>
+          )}
+
           <p
             className="whitespace-pre-line text-sm leading-relaxed"
             style={{ color: "var(--color-text)" }}
@@ -175,55 +218,95 @@ const ProductDetail = () => {
             {product.description}
           </p>
 
-          {/* Quantity + Add to cart — hidden for admin */}
+          {/* Quantity + Action buttons — hidden for admin */}
           {!isAdmin && (
-            <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:items-center">
-              <div
-                className="flex items-center rounded-lg border"
-                style={{ borderColor: "var(--color-border)" }}
-              >
-                <button
-                  type="button"
-                  onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  disabled={qty <= 1}
-                  className="px-3 py-2 disabled:opacity-40"
-                  style={{ color: "var(--color-text)" }}
-                >
-                  <FiMinus size={14} />
-                </button>
+            <div className="flex flex-col gap-3 pt-3">
+              {/* Quantity selector */}
+              <div className="flex flex-wrap items-center gap-3">
                 <span
-                  className="w-10 text-center text-sm font-semibold"
+                  className="text-sm font-medium"
                   style={{ color: "var(--color-text)" }}
                 >
-                  {qty}
+                  Quantity
                 </span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setQty((q) => Math.min(product.stock || 1, q + 1))
-                  }
-                  disabled={qty >= (product.stock || 1)}
-                  className="px-3 py-2 disabled:opacity-40"
-                  style={{ color: "var(--color-text)" }}
+                <div
+                  className="flex items-center rounded-lg border"
+                  style={{ borderColor: "var(--color-border)" }}
                 >
-                  <FiPlus size={14} />
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setQty((q) => Math.max(1, q - 1))}
+                    disabled={qty <= 1 || outOfStock}
+                    className="px-3 py-2 disabled:opacity-40"
+                    style={{ color: "var(--color-text)" }}
+                  >
+                    <FiMinus size={14} />
+                  </button>
+                  <span
+                    className="w-10 text-center text-sm font-semibold"
+                    style={{ color: "var(--color-text)" }}
+                  >
+                    {qty}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
+                    disabled={qty >= maxQty || outOfStock}
+                    className="px-3 py-2 disabled:opacity-40"
+                    style={{ color: "var(--color-text)" }}
+                  >
+                    <FiPlus size={14} />
+                  </button>
+                </div>
+
+                {!outOfStock && (
+                  <span
+                    className="text-xs font-medium"
+                    style={{
+                      color:
+                        product.stock <= 5
+                          ? "var(--color-warning)"
+                          : "var(--color-text-muted)",
+                    }}
+                  >
+                    {product.stock <= 5
+                      ? `Only ${product.stock} left!`
+                      : `${product.stock} available`}
+                  </span>
+                )}
               </div>
 
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                disabled={outOfStock}
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-semibold text-white shadow-sm transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
-                style={{ backgroundColor: "var(--color-primary)" }}
-              >
-                <FiShoppingCart size={16} />
-                {outOfStock ? "Out of stock" : "Add to Cart"}
-              </button>
+              {/* Add to Cart + Buy Now */}
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={addToCart}
+                  disabled={outOfStock || adding}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg border py-3 text-sm font-semibold transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  style={{
+                    borderColor: "var(--color-primary)",
+                    color: "var(--color-primary)",
+                    backgroundColor: "var(--color-surface)",
+                  }}
+                >
+                  <FiShoppingCart size={16} />
+                  {outOfStock ? "Out of stock" : "Add to Cart"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={goToCart}
+                  disabled={outOfStock || adding}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-semibold text-white shadow-sm transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                  style={{ backgroundColor: "var(--color-primary)" }}
+                >
+                  <FiZap size={16} />
+                  {outOfStock ? "Unavailable" : "Buy Now"}
+                </button>
+              </div>
             </div>
           )}
 
-          {/* Admin info */}
           {isAdmin && (
             <div
               className="rounded-lg border p-3 text-xs"
