@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import {
-  FiPlus,
-  FiSearch,
-  FiChevronLeft,
-  FiChevronRight,
-} from "react-icons/fi";
+import { FiPlus, FiSearch, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import toast from "react-hot-toast";
 import useProducts from "../../hooks/useProducts";
 import useCategories from "../../hooks/useCategories";
@@ -97,20 +92,26 @@ const Products = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--color-text)" }}>
+          <h1
+            className="text-xl font-bold sm:text-2xl"
+            style={{ color: "var(--color-text)" }}
+          >
             Products
           </h1>
-          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+          <p
+            className="text-xs sm:text-sm"
+            style={{ color: "var(--color-text-muted)" }}
+          >
             Manage your store products
           </p>
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md"
+          className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md sm:w-auto"
           style={{ backgroundColor: "var(--color-primary)" }}
         >
           <FiPlus size={16} /> Add Product
@@ -118,7 +119,7 @@ const Products = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         <div className="relative flex-1 sm:max-w-xs">
           <FiSearch
             className="absolute left-3 top-1/2 -translate-y-1/2"
@@ -195,24 +196,33 @@ const Products = () => {
           />
 
           {pagination.pages > 1 && (
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex flex-col items-center justify-between gap-2 text-sm sm:flex-row">
               <p style={{ color: "var(--color-text-muted)" }}>
-                Page {pagination.page} of {pagination.pages} — {pagination.total} total
+                Page {pagination.page} of {pagination.pages} — {pagination.total}{" "}
+                total
               </p>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={pagination.page <= 1 || loading}
                   className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}
+                  style={{
+                    borderColor: "var(--color-border)",
+                    color: "var(--color-text)",
+                  }}
                 >
                   <FiChevronLeft size={14} /> Prev
                 </button>
                 <button
-                  onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))}
+                  onClick={() =>
+                    setPage((p) => Math.min(pagination.pages, p + 1))
+                  }
                   disabled={pagination.page >= pagination.pages || loading}
                   className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}
+                  style={{
+                    borderColor: "var(--color-border)",
+                    color: "var(--color-text)",
+                  }}
                 >
                   Next <FiChevronRight size={14} />
                 </button>
@@ -225,11 +235,14 @@ const Products = () => {
       {/* Create / Edit modal */}
       {formOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-8"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-3 py-6 sm:px-4 sm:py-8"
           style={{ backgroundColor: "rgba(15, 23, 42, 0.5)" }}
           onClick={() => !saving && (setFormOpen(false), setEditing(null))}
         >
-          <div className="w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="w-full max-w-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <ProductForm
               initialData={editing}
               loading={saving}
@@ -240,14 +253,11 @@ const Products = () => {
         </div>
       )}
 
-      {/* Delete confirm */}
       <ConfirmDialog
         open={!!deleting}
         title="Delete product?"
         message={
-          deleting
-            ? `This will permanently delete "${deleting.name}".`
-            : ""
+          deleting ? `This will permanently delete "${deleting.name}".` : ""
         }
         confirmLabel="Delete"
         loading={saving}

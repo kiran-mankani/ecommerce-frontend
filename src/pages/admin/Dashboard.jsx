@@ -15,15 +15,12 @@ import ErrorState from "../../components/common/ErrorState";
 import AdminStatCard from "../../components/admin/AdminStatCard";
 import { getDashboardApi } from "../../services/adminService";
 
-/* Convert /uploads/... to a full URL pointing at the backend */
 const resolveImageUrl = (path) => {
   if (!path) return "";
   if (/^https?:\/\//i.test(path)) return path;
-
   const apiBase =
     import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
   const origin = apiBase.replace(/\/api\/v1\/?$/, "");
-
   return `${origin}${path.startsWith("/") ? path : `/${path}`}`;
 };
 
@@ -58,21 +55,24 @@ const Dashboard = () => {
   const { totals, recentOrders, recentProducts, topProducts } = data;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5 md:space-y-6 lg:space-y-8">
       <div>
         <h1
-          className="text-2xl font-bold"
+          className="text-xl font-bold sm:text-2xl"
           style={{ color: "var(--color-text)" }}
         >
           Dashboard
         </h1>
-        <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+        <p
+          className="text-xs sm:text-sm"
+          style={{ color: "var(--color-text-muted)" }}
+        >
           Live overview of your store
         </p>
       </div>
 
-      {/* Primary stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Primary stats: 1 col below 400px, 2 cols on phones, 4 on lg */}
+      <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         <AdminStatCard
           label="Revenue"
           value={`$${(totals?.revenue ?? 0).toFixed(2)}`}
@@ -100,9 +100,9 @@ const Dashboard = () => {
       </div>
 
       {/* Secondary stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         <AdminStatCard
-          label="Pending Orders"
+          label="Pending"
           value={totals?.pendingOrders ?? 0}
           icon={FiAlertTriangle}
           accent="warning"
@@ -127,8 +127,8 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Recent Orders + Recent Products */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      {/* Recent sections */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
         <RecentCard
           title="Recent Orders"
           viewAllLink="/admin/orders"
@@ -138,7 +138,7 @@ const Dashboard = () => {
             <Link
               key={o._id}
               to={`/admin/orders/${o._id}`}
-              className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 transition hover:bg-slate-50"
+              className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 transition hover:bg-slate-50 sm:px-3"
             >
               <div className="min-w-0 flex-1">
                 <p
@@ -148,13 +148,13 @@ const Dashboard = () => {
                   {o.userId?.name || "Customer"}
                 </p>
                 <p
-                  className="truncate text-xs"
+                  className="break-words text-[11px] sm:text-xs"
                   style={{ color: "var(--color-text-muted)" }}
                 >
                   {new Date(o.createdAt).toLocaleString()}
                 </p>
               </div>
-              <div className="text-right">
+              <div className="shrink-0 text-right">
                 <p
                   className="text-sm font-semibold"
                   style={{ color: "var(--color-text)" }}
@@ -181,9 +181,9 @@ const Dashboard = () => {
             <Link
               key={p._id}
               to={`/product/${p._id}`}
-              className="flex items-center gap-3 rounded-lg px-3 py-2 transition hover:bg-slate-50"
+              className="flex items-center gap-2 rounded-lg px-2 py-2 transition hover:bg-slate-50 sm:gap-3 sm:px-3"
             >
-              <ProductThumb src={p.images?.[0]} name={p.name} size={40} />
+              <ProductThumb src={p.images?.[0]} name={p.name} size={36} />
               <div className="min-w-0 flex-1">
                 <p
                   className="truncate text-sm font-medium"
@@ -192,14 +192,14 @@ const Dashboard = () => {
                   {p.name}
                 </p>
                 <p
-                  className="truncate text-xs"
+                  className="truncate text-[11px] sm:text-xs"
                   style={{ color: "var(--color-text-muted)" }}
                 >
                   {p.categoryId?.name || "—"} · stock {p.stock}
                 </p>
               </div>
               <p
-                className="text-sm font-semibold"
+                className="shrink-0 text-sm font-semibold"
                 style={{ color: "var(--color-text)" }}
               >
                 ${(p.price ?? 0).toFixed(2)}
@@ -211,20 +211,20 @@ const Dashboard = () => {
 
       {/* Top-selling products */}
       <div
-        className="rounded-xl border p-5"
+        className="rounded-xl border p-3 sm:p-4 md:p-5"
         style={{
           backgroundColor: "var(--color-surface)",
           borderColor: "var(--color-border)",
         }}
       >
         <h3
-          className="mb-3 text-base font-bold"
+          className="mb-3 text-sm font-bold sm:text-base"
           style={{ color: "var(--color-text)" }}
         >
           Top Selling Products
         </h3>
 
-        {(!topProducts || topProducts.length === 0) ? (
+        {!topProducts || topProducts.length === 0 ? (
           <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
             No sales yet.
           </p>
@@ -233,12 +233,12 @@ const Dashboard = () => {
             {topProducts.map((t, i) => (
               <li
                 key={t.productId}
-                className="flex items-center justify-between gap-3 rounded-lg px-3 py-2"
+                className="flex items-center justify-between gap-2 rounded-lg px-2 py-2 sm:gap-3 sm:px-3"
                 style={{ backgroundColor: "var(--color-surface-alt)" }}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                   <span
-                    className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold"
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold"
                     style={{
                       backgroundColor: "rgba(37, 99, 235, 0.1)",
                       color: "var(--color-primary)",
@@ -247,21 +247,21 @@ const Dashboard = () => {
                     {i + 1}
                   </span>
                   <span
-                    className="text-sm font-medium"
+                    className="truncate text-sm font-medium"
                     style={{ color: "var(--color-text)" }}
                   >
                     {t.name}
                   </span>
                 </div>
-                <div className="text-right">
+                <div className="shrink-0 text-right">
                   <p
-                    className="text-sm font-semibold"
+                    className="text-xs font-semibold sm:text-sm"
                     style={{ color: "var(--color-text)" }}
                   >
                     {t.quantity} sold
                   </p>
                   <p
-                    className="text-xs"
+                    className="text-[10px] sm:text-xs"
                     style={{ color: "var(--color-text-muted)" }}
                   >
                     ${(t.revenue ?? 0).toFixed(2)}
@@ -276,11 +276,9 @@ const Dashboard = () => {
   );
 };
 
-/* ---------------- helper components ---------------- */
-
 const RecentCard = ({ title, viewAllLink, items, emptyMessage, renderRow }) => (
   <div
-    className="rounded-xl border p-5"
+    className="rounded-xl border p-3 sm:p-4 md:p-5"
     style={{
       backgroundColor: "var(--color-surface)",
       borderColor: "var(--color-border)",
@@ -288,7 +286,7 @@ const RecentCard = ({ title, viewAllLink, items, emptyMessage, renderRow }) => (
   >
     <div className="mb-3 flex items-center justify-between">
       <h3
-        className="text-base font-bold"
+        className="text-sm font-bold sm:text-base"
         style={{ color: "var(--color-text)" }}
       >
         {title}
@@ -312,8 +310,7 @@ const RecentCard = ({ title, viewAllLink, items, emptyMessage, renderRow }) => (
   </div>
 );
 
-/* Image with letter fallback when the URL fails or is blocked */
-const ProductThumb = ({ src, name = "", size = 40 }) => {
+const ProductThumb = ({ src, name = "", size = 36 }) => {
   const url = resolveImageUrl(src);
   const [errored, setErrored] = useState(false);
 
@@ -322,6 +319,7 @@ const ProductThumb = ({ src, name = "", size = 40 }) => {
       <img
         src={url}
         alt={name}
+        loading="lazy"
         style={{ width: size, height: size }}
         className="shrink-0 rounded-lg object-cover"
         onError={() => setErrored(true)}

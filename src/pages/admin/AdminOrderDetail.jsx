@@ -32,7 +32,7 @@ const AdminOrderDetail = () => {
   const order = current;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-sm font-medium hover:underline"
@@ -41,10 +41,10 @@ const AdminOrderDetail = () => {
         <FiArrowLeft size={16} /> Back
       </button>
 
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <h1
-            className="text-2xl font-bold"
+            className="text-xl font-bold sm:text-2xl"
             style={{ color: "var(--color-text)" }}
           >
             Order Details
@@ -72,17 +72,16 @@ const AdminOrderDetail = () => {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        {/* Items */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px] lg:gap-6">
         <div
-          className="space-y-3 rounded-xl border p-5"
+          className="space-y-3 rounded-xl border p-3 sm:p-4 md:p-5"
           style={{
             backgroundColor: "var(--color-surface)",
             borderColor: "var(--color-border)",
           }}
         >
           <h2
-            className="text-base font-bold"
+            className="text-sm font-bold sm:text-base"
             style={{ color: "var(--color-text)" }}
           >
             Items
@@ -94,10 +93,10 @@ const AdminOrderDetail = () => {
           >
             {order.items.map((it, i) => (
               <li key={i} className="flex justify-between gap-3 py-3">
-                <div>
+                <div className="min-w-0">
                   <Link
                     to={`/product/${it.productId}`}
-                    className="text-sm font-medium hover:underline"
+                    className="break-words text-sm font-medium hover:underline"
                     style={{ color: "var(--color-text)" }}
                   >
                     {it.productName}
@@ -111,7 +110,7 @@ const AdminOrderDetail = () => {
                   </p>
                 </div>
                 <span
-                  className="text-sm font-semibold"
+                  className="shrink-0 text-sm font-semibold"
                   style={{ color: "var(--color-text)" }}
                 >
                   ${it.subtotal.toFixed(2)}
@@ -121,17 +120,16 @@ const AdminOrderDetail = () => {
           </ul>
         </div>
 
-        {/* Sidebar: customer, shipping, summary */}
-        <aside className="space-y-6">
+        <aside className="space-y-4 lg:space-y-6">
           <div
-            className="space-y-2 rounded-xl border p-5"
+            className="space-y-2 rounded-xl border p-3 sm:p-4 md:p-5"
             style={{
               backgroundColor: "var(--color-surface)",
               borderColor: "var(--color-border)",
             }}
           >
             <h3
-              className="text-base font-bold"
+              className="text-sm font-bold sm:text-base"
               style={{ color: "var(--color-text)" }}
             >
               Customer
@@ -139,20 +137,20 @@ const AdminOrderDetail = () => {
             <p className="text-sm" style={{ color: "var(--color-text)" }}>
               {order.userId?.name || "—"}
             </p>
-            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+            <p className="break-all text-sm" style={{ color: "var(--color-text-muted)" }}>
               {order.userId?.email || ""}
             </p>
           </div>
 
           <div
-            className="space-y-2 rounded-xl border p-5"
+            className="space-y-2 rounded-xl border p-3 sm:p-4 md:p-5"
             style={{
               backgroundColor: "var(--color-surface)",
               borderColor: "var(--color-border)",
             }}
           >
             <h3
-              className="text-base font-bold"
+              className="text-sm font-bold sm:text-base"
               style={{ color: "var(--color-text)" }}
             >
               Shipping Address
@@ -163,7 +161,7 @@ const AdminOrderDetail = () => {
             <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
               {order.shippingAddress.phone}
             </p>
-            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+            <p className="break-words text-sm" style={{ color: "var(--color-text-muted)" }}>
               {order.shippingAddress.address}
             </p>
             <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
@@ -172,14 +170,14 @@ const AdminOrderDetail = () => {
           </div>
 
           <div
-            className="space-y-3 rounded-xl border p-5"
+            className="space-y-3 rounded-xl border p-3 sm:p-4 md:p-5"
             style={{
               backgroundColor: "var(--color-surface)",
               borderColor: "var(--color-border)",
             }}
           >
             <h3
-              className="text-base font-bold"
+              className="text-sm font-bold sm:text-base"
               style={{ color: "var(--color-text)" }}
             >
               Summary

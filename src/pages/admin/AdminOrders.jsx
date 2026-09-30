@@ -18,7 +18,6 @@ import Loader from "../../components/common/Loader";
 import ErrorState from "../../components/common/ErrorState";
 import EmptyState from "../../components/common/EmptyState";
 import OrderStatusBadge from "../../components/shop/OrderStatusBadge";
-import OrderStatusSelect from "../../components/admin/OrderStatusSelect";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
 
 const AdminOrders = () => {
@@ -64,23 +63,26 @@ const AdminOrders = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
         <h1
-          className="text-2xl font-bold"
+          className="text-xl font-bold sm:text-2xl"
           style={{ color: "var(--color-text)" }}
         >
           Orders
         </h1>
-        <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+        <p
+          className="text-xs sm:text-sm"
+          style={{ color: "var(--color-text-muted)" }}
+        >
           Manage all customer orders
         </p>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <form onSubmit={submitSearch} className="flex flex-1 gap-2">
-          <div className="relative flex-1 max-w-md">
+          <div className="relative max-w-md flex-1">
             <FiSearch
               className="absolute left-3 top-1/2 -translate-y-1/2"
               size={16}
@@ -165,15 +167,21 @@ const AdminOrders = () => {
                   }}
                 >
                   <tr>
-                    <th className="px-4 py-3 font-semibold">Order ID</th>
-                    <th className="px-4 py-3 font-semibold">Customer</th>
-                    <th className="hidden px-4 py-3 font-semibold md:table-cell">
+                    <th className="px-3 py-3 font-semibold md:px-4">
+                      Order ID
+                    </th>
+                    <th className="hidden px-3 py-3 font-semibold md:table-cell md:px-4">
+                      Customer
+                    </th>
+                    <th className="hidden px-3 py-3 font-semibold lg:table-cell md:px-4">
                       Items
                     </th>
-                    <th className="px-4 py-3 font-semibold">Total</th>
-                    <th className="px-4 py-3 font-semibold">Status</th>
-                    <th className="px-4 py-3 font-semibold">Date</th>
-                    <th className="px-4 py-3 text-right font-semibold">
+                    <th className="px-3 py-3 font-semibold md:px-4">Total</th>
+                    <th className="px-3 py-3 font-semibold md:px-4">Status</th>
+                    <th className="hidden px-3 py-3 font-semibold sm:table-cell md:px-4">
+                      Date
+                    </th>
+                    <th className="px-3 py-3 text-right font-semibold md:px-4">
                       Actions
                     </th>
                   </tr>
@@ -186,13 +194,21 @@ const AdminOrders = () => {
                       style={{ borderColor: "var(--color-border)" }}
                     >
                       <td
-                        className="break-all px-4 py-3 text-xs"
+                        className="break-all px-3 py-3 text-xs md:px-4"
                         style={{ color: "var(--color-text)" }}
                       >
-                        {o._id}
+                        <div className="font-medium">
+                          {o.userId?.name || "—"}
+                        </div>
+                        <div
+                          className="text-[10px]"
+                          style={{ color: "var(--color-text-muted)" }}
+                        >
+                          {o._id}
+                        </div>
                       </td>
                       <td
-                        className="px-4 py-3"
+                        className="hidden px-3 py-3 md:table-cell md:px-4"
                         style={{ color: "var(--color-text)" }}
                       >
                         <div className="font-medium">
@@ -206,27 +222,27 @@ const AdminOrders = () => {
                         </div>
                       </td>
                       <td
-                        className="hidden px-4 py-3 md:table-cell"
+                        className="hidden px-3 py-3 lg:table-cell md:px-4"
                         style={{ color: "var(--color-text-muted)" }}
                       >
                         {o.items.length}
                       </td>
                       <td
-                        className="px-4 py-3 font-semibold"
+                        className="px-3 py-3 font-semibold md:px-4"
                         style={{ color: "var(--color-text)" }}
                       >
                         ${o.total.toFixed(2)}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-3 md:px-4">
                         <OrderStatusBadge status={o.orderStatus} />
                       </td>
                       <td
-                        className="px-4 py-3 text-xs"
+                        className="hidden px-3 py-3 text-xs sm:table-cell md:px-4"
                         style={{ color: "var(--color-text-muted)" }}
                       >
                         {new Date(o.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-3 md:px-4">
                         <div className="flex justify-end gap-1">
                           <Link
                             to={`/admin/orders/${o._id}`}
@@ -255,7 +271,7 @@ const AdminOrders = () => {
           </div>
 
           {pagination.pages > 1 && (
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex flex-col items-center justify-between gap-2 text-sm sm:flex-row">
               <p style={{ color: "var(--color-text-muted)" }}>
                 Page {pagination.page} of {pagination.pages} —{" "}
                 {pagination.total} total
@@ -289,7 +305,6 @@ const AdminOrders = () => {
         </>
       )}
 
-      {/* Delete confirm dialog */}
       <ConfirmDialog
         open={!!deleting}
         title="Delete order?"

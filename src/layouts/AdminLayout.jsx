@@ -37,18 +37,18 @@ const AdminLayout = () => {
     >
       {/* TOP BAR */}
       <header
-        className="flex items-center justify-between border-b px-6 py-4 md:px-10"
+        className="flex items-center justify-between border-b px-3 py-2.5 sm:px-4 sm:py-3 md:px-6 lg:px-10"
         style={{
           backgroundColor: "var(--color-surface)",
           borderColor: "var(--color-border)",
         }}
       >
         <Link to="/admin" className="flex items-center gap-2">
-          <span className="text-xl font-bold tracking-tight text-blue-700">
+          <span className="text-base font-bold tracking-tight text-blue-700 sm:text-lg md:text-xl">
             ecommerce
           </span>
           <span
-            className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+            className="hidden rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider sm:inline-block"
             style={{
               backgroundColor: "rgba(37, 99, 235, 0.1)",
               color: "var(--color-primary)",
@@ -58,11 +58,12 @@ const AdminLayout = () => {
           </span>
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Link
             to="/"
-            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition hover:bg-slate-100"
+            className="flex items-center gap-1.5 rounded-lg p-2 text-sm font-medium transition hover:bg-slate-100 sm:gap-2 sm:px-3"
             style={{ color: "var(--color-text-muted)" }}
+            title="Store"
           >
             <FiHome size={16} />
             <span className="hidden sm:inline">Store</span>
@@ -70,8 +71,9 @@ const AdminLayout = () => {
           <button
             type="button"
             onClick={handleLogout}
-            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition hover:bg-red-50"
+            className="flex items-center gap-1.5 rounded-lg p-2 text-sm font-medium transition hover:bg-red-50 sm:gap-2 sm:px-3"
             style={{ color: "var(--color-danger)" }}
+            title="Logout"
           >
             <FiLogOut size={16} />
             <span className="hidden sm:inline">Logout</span>
@@ -79,10 +81,43 @@ const AdminLayout = () => {
         </div>
       </header>
 
-      {/* BODY: SIDEBAR + CONTENT */}
+      {/* Mobile horizontal nav */}
+      <div
+        className="border-b md:hidden"
+        style={{
+          backgroundColor: "var(--color-surface)",
+          borderColor: "var(--color-border)",
+        }}
+      >
+        <div className="flex gap-1 overflow-x-auto px-2 py-2">
+          {navItems.map(({ to, label, icon: Icon, end, disabled }) => (
+            <NavLink
+              key={to}
+              to={disabled ? "#" : to}
+              end={end}
+              onClick={(e) => disabled && e.preventDefault()}
+              className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${
+                disabled ? "cursor-not-allowed opacity-50" : "hover:bg-slate-100"
+              }`}
+              style={({ isActive }) => ({
+                backgroundColor: isActive
+                  ? "rgba(37, 99, 235, 0.1)"
+                  : "transparent",
+                color: isActive ? "var(--color-primary)" : "var(--color-text)",
+              })}
+            >
+              <Icon size={14} />
+              {label}
+            </NavLink>
+          ))}
+        </div>
+      </div>
+
+      {/* BODY */}
       <div className="flex flex-1">
+        {/* Desktop sidebar */}
         <aside
-          className="hidden w-64 flex-col gap-1 border-r p-4 md:flex"
+          className="hidden w-56 shrink-0 flex-col gap-1 border-r p-3 md:flex lg:w-64 lg:p-4"
           style={{
             backgroundColor: "var(--color-surface)",
             borderColor: "var(--color-border)",
@@ -94,7 +129,7 @@ const AdminLayout = () => {
               to={disabled ? "#" : to}
               end={end}
               onClick={(e) => disabled && e.preventDefault()}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
                 disabled ? "cursor-not-allowed opacity-50" : "hover:bg-slate-100"
               }`}
               style={({ isActive }) => ({
@@ -104,8 +139,8 @@ const AdminLayout = () => {
                 color: isActive ? "var(--color-primary)" : "var(--color-text)",
               })}
             >
-              <Icon size={18} />
-              {label}
+              <Icon size={16} />
+              <span className="truncate">{label}</span>
               {disabled && (
                 <span
                   className="ml-auto text-[10px] uppercase"
@@ -118,7 +153,8 @@ const AdminLayout = () => {
           ))}
         </aside>
 
-        <main className="flex-1 p-4 md:p-8">
+        {/* Content */}
+        <main className="min-w-0 flex-1 p-3 sm:p-4 md:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>

@@ -16,7 +16,8 @@ const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -70,7 +71,6 @@ const ProductDetail = () => {
 
   return (
     <div className="space-y-6">
-      {/* Back */}
       <button
         type="button"
         onClick={() => navigate(-1)}
@@ -95,6 +95,9 @@ const ProductDetail = () => {
                 src={images[activeImg]}
                 alt={product.name}
                 className="h-full w-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
               />
             ) : (
               <div
@@ -172,51 +175,75 @@ const ProductDetail = () => {
             {product.description}
           </p>
 
-          {/* Quantity + Add to cart */}
-          <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:items-center">
-            <div
-              className="flex items-center rounded-lg border"
-              style={{ borderColor: "var(--color-border)" }}
-            >
+          {/* Quantity + Add to cart — hidden for admin */}
+          {!isAdmin && (
+            <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:items-center">
+              <div
+                className="flex items-center rounded-lg border"
+                style={{ borderColor: "var(--color-border)" }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setQty((q) => Math.max(1, q - 1))}
+                  disabled={qty <= 1}
+                  className="px-3 py-2 disabled:opacity-40"
+                  style={{ color: "var(--color-text)" }}
+                >
+                  <FiMinus size={14} />
+                </button>
+                <span
+                  className="w-10 text-center text-sm font-semibold"
+                  style={{ color: "var(--color-text)" }}
+                >
+                  {qty}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setQty((q) => Math.min(product.stock || 1, q + 1))
+                  }
+                  disabled={qty >= (product.stock || 1)}
+                  className="px-3 py-2 disabled:opacity-40"
+                  style={{ color: "var(--color-text)" }}
+                >
+                  <FiPlus size={14} />
+                </button>
+              </div>
+
               <button
                 type="button"
-                onClick={() => setQty((q) => Math.max(1, q - 1))}
-                disabled={qty <= 1}
-                className="px-3 py-2 disabled:opacity-40"
-                style={{ color: "var(--color-text)" }}
+                onClick={handleAddToCart}
+                disabled={outOfStock}
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-semibold text-white shadow-sm transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                style={{ backgroundColor: "var(--color-primary)" }}
               >
-                <FiMinus size={14} />
-              </button>
-              <span
-                className="w-10 text-center text-sm font-semibold"
-                style={{ color: "var(--color-text)" }}
-              >
-                {qty}
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  setQty((q) => Math.min(product.stock || 1, q + 1))
-                }
-                disabled={qty >= (product.stock || 1)}
-                className="px-3 py-2 disabled:opacity-40"
-                style={{ color: "var(--color-text)" }}
-              >
-                <FiPlus size={14} />
+                <FiShoppingCart size={16} />
+                {outOfStock ? "Out of stock" : "Add to Cart"}
               </button>
             </div>
+          )}
 
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              disabled={outOfStock}
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-semibold text-white shadow-sm transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
-              style={{ backgroundColor: "var(--color-primary)" }}
+          {/* Admin info */}
+          {isAdmin && (
+            <div
+              className="rounded-lg border p-3 text-xs"
+              style={{
+                backgroundColor: "var(--color-surface-alt)",
+                borderColor: "var(--color-border)",
+                color: "var(--color-text-muted)",
+              }}
             >
-              <FiShoppingCart size={16} />
-              {outOfStock ? "Out of stock" : "Add to Cart"}
-            </button>
-          </div>
+              You are viewing this as an admin. To manage this product, go to{" "}
+              <Link
+                to="/admin/products"
+                className="font-semibold hover:underline"
+                style={{ color: "var(--color-primary)" }}
+              >
+                Admin → Products
+              </Link>
+              .
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -2,7 +2,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { FiShoppingCart } from "react-icons/fi";
 import toast from "react-hot-toast";
-import ProductImage from "../common/ProductImage";
 import PriceDisplay from "./PriceDisplay";
 import StockBadge from "./StockBadge";
 import { addToCartThunk } from "../../store/slices/cartSlice";
@@ -11,7 +10,8 @@ import useAuth from "../../hooks/useAuth";
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
   const quickAdd = async (e) => {
     e.preventDefault();
@@ -40,6 +40,7 @@ const ProductCard = ({ product }) => {
         borderColor: "var(--color-border)",
       }}
     >
+      {/* Image */}
       <div
         className="relative aspect-square w-full overflow-hidden"
         style={{ backgroundColor: "var(--color-surface-alt)" }}
@@ -48,66 +49,86 @@ const ProductCard = ({ product }) => {
           <img
             src={product.images[0]}
             alt={product.name}
+            loading="lazy"
             className="h-full w-full object-cover transition group-hover:scale-105"
-          />
-        ) : (
-          <div
-            className="flex h-full w-full items-center justify-center text-3xl font-bold"
-            style={{
-              backgroundColor: "rgba(37, 99, 235, 0.08)",
-              color: "var(--color-primary)",
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+              const fb = e.currentTarget.parentElement?.querySelector(
+                "[data-fallback]"
+              );
+              if (fb) fb.style.display = "flex";
             }}
-          >
-            {product.name?.[0]?.toUpperCase() || "?"}
-          </div>
-        )}
+          />
+        ) : null}
+
+        <div
+          data-fallback
+          className="h-full w-full items-center justify-center text-4xl font-bold"
+          style={{
+            display: product.images?.[0] ? "none" : "flex",
+            backgroundColor: "rgba(37, 99, 235, 0.08)",
+            color: "var(--color-primary)",
+          }}
+        >
+          {product.name?.[0]?.toUpperCase() || "?"}
+        </div>
 
         <div className="absolute left-2 top-2">
           <StockBadge stock={product.stock} />
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 p-4">
+      {/* Content */}
+      <div className="flex flex-1 flex-col gap-1 p-2 sm:gap-1.5 sm:p-3 md:p-4">
         <h3
-          className="line-clamp-2 text-sm font-semibold leading-tight"
+          className="line-clamp-2 text-xs font-semibold leading-snug sm:text-sm"
           style={{ color: "var(--color-text)" }}
         >
           {product.name}
         </h3>
 
         {product.brand && (
-          <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+          <p
+            className="truncate text-[10px] sm:text-xs"
+            style={{ color: "var(--color-text-muted)" }}
+          >
             {product.brand}
           </p>
         )}
 
         {product.categoryId?.name && (
           <p
-            className="text-[11px] uppercase tracking-wide"
+            className="truncate text-[9px] uppercase tracking-wide sm:text-[11px]"
             style={{ color: "var(--color-primary)" }}
           >
             {product.categoryId.name}
           </p>
         )}
 
-        <div className="mt-auto pt-2">
+        <div className="mt-auto pt-1.5 sm:pt-2">
           <PriceDisplay
             price={product.price}
             discount={product.discount}
-            size="md"
+            size="sm"
           />
         </div>
 
-        <button
-          type="button"
-          onClick={quickAdd}
-          disabled={outOfStock}
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg py-2 text-xs font-semibold text-white transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
-          style={{ backgroundColor: "var(--color-primary)" }}
-        >
-          <FiShoppingCart size={14} />
-          {outOfStock ? "Out of stock" : "Add to Cart"}
-        </button>
+        {/* Add to Cart — hidden for admin */}
+        {!isAdmin && (
+          <button
+            type="button"
+            onClick={quickAdd}
+            disabled={outOfStock}
+            className="mt-1 flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-[11px] font-semibold text-white transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 sm:gap-2 sm:py-2 sm:text-xs"
+            style={{ backgroundColor: "var(--color-primary)" }}
+          >
+            <FiShoppingCart size={12} className="sm:hidden" />
+            <FiShoppingCart size={14} className="hidden sm:block" />
+            <span className="truncate">
+              {outOfStock ? "Out of stock" : "Add to Cart"}
+            </span>
+          </button>
+        )}
       </div>
     </Link>
   );
