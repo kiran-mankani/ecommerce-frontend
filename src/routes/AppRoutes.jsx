@@ -16,6 +16,7 @@ import Categories from "../pages/admin/Categories";
 import Products from "../pages/admin/Products";
 import AdminOrders from "../pages/admin/AdminOrders";
 import AdminOrderDetail from "../pages/admin/AdminOrderDetail";
+import AdminUsers from "../pages/admin/Users";
 import Home from "../pages/shop/Home";
 import ProductDetail from "../pages/shop/ProductDetail";
 import Cart from "../pages/shop/Cart";
@@ -94,6 +95,7 @@ const AppRoutes = () => {
         <Route path="/admin/products" element={<Products />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/admin/orders/:id" element={<AdminOrderDetail />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

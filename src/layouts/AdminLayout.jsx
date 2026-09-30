@@ -17,7 +17,7 @@ const navItems = [
   { to: "/admin/categories", label: "Categories", icon: FiTag },
   { to: "/admin/products", label: "Products", icon: FiPackage },
   { to: "/admin/orders", label: "Orders", icon: FiShoppingBag },
-  { to: "/admin/users", label: "Users", icon: FiUsers, disabled: true },
+  { to: "/admin/users", label: "Users", icon: FiUsers },
 ];
 
 const AdminLayout = () => {
@@ -35,7 +35,6 @@ const AdminLayout = () => {
       className="flex min-h-screen flex-col"
       style={{ backgroundColor: "var(--color-surface-alt)" }}
     >
-      {/* TOP BAR */}
       <header
         className="flex items-center justify-between border-b px-3 py-2.5 sm:px-4 sm:py-3 md:px-6 lg:px-10"
         style={{
@@ -81,7 +80,6 @@ const AdminLayout = () => {
         </div>
       </header>
 
-      {/* Mobile horizontal nav */}
       <div
         className="border-b md:hidden"
         style={{
@@ -113,9 +111,7 @@ const AdminLayout = () => {
         </div>
       </div>
 
-      {/* BODY */}
       <div className="flex flex-1">
-        {/* Desktop sidebar */}
         <aside
           className="hidden w-56 shrink-0 flex-col gap-1 border-r p-3 md:flex lg:w-64 lg:p-4"
           style={{
@@ -153,7 +149,6 @@ const AdminLayout = () => {
           ))}
         </aside>
 
-        {/* Content */}
         <main className="min-w-0 flex-1 p-3 sm:p-4 md:p-6 lg:p-8">
           <Outlet />
         </main>

@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import {
-  FiPlus,
-  FiSearch,
-  FiChevronLeft,
-  FiChevronRight,
-} from "react-icons/fi";
+import { FiPlus, FiSearch } from "react-icons/fi";
 import toast from "react-hot-toast";
 import useCategories from "../../hooks/useCategories";
 import {
@@ -19,6 +14,7 @@ import ErrorState from "../../components/common/ErrorState";
 import CategoryTable from "../../components/admin/CategoryTable";
 import CategoryForm from "../../components/admin/CategoryForm";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
+import Pagination from "../../components/common/Pagination";
 
 const Categories = () => {
   const dispatch = useDispatch();
@@ -77,7 +73,6 @@ const Categories = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1
@@ -102,7 +97,6 @@ const Categories = () => {
         </button>
       </div>
 
-      {/* Search */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -141,7 +135,6 @@ const Categories = () => {
         </button>
       </form>
 
-      {/* Content */}
       {loading && items.length === 0 ? (
         <Loader size="lg" />
       ) : error && items.length === 0 ? (
@@ -155,37 +148,20 @@ const Categories = () => {
           />
 
           {pagination.pages > 1 && (
-            <div className="flex flex-col items-center justify-between gap-2 text-sm sm:flex-row">
-              <p style={{ color: "var(--color-text-muted)" }}>
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+              <p
+                className="text-sm"
+                style={{ color: "var(--color-text-muted)" }}
+              >
                 Page {pagination.page} of {pagination.pages} —{" "}
                 {pagination.total} total
               </p>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={pagination.page <= 1 || loading}
-                  className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{
-                    borderColor: "var(--color-border)",
-                    color: "var(--color-text)",
-                  }}
-                >
-                  <FiChevronLeft size={14} /> Prev
-                </button>
-                <button
-                  onClick={() =>
-                    setPage((p) => Math.min(pagination.pages, p + 1))
-                  }
-                  disabled={pagination.page >= pagination.pages || loading}
-                  className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{
-                    borderColor: "var(--color-border)",
-                    color: "var(--color-text)",
-                  }}
-                >
-                  Next <FiChevronRight size={14} />
-                </button>
-              </div>
+              <Pagination
+                page={pagination.page}
+                pages={pagination.pages}
+                onChange={setPage}
+                disabled={loading}
+              />
             </div>
           )}
         </>
@@ -215,9 +191,7 @@ const Categories = () => {
         open={!!deleting}
         title="Delete category?"
         message={
-          deleting
-            ? `This will permanently delete "${deleting.name}".`
-            : ""
+          deleting ? `This will permanently delete "${deleting.name}".` : ""
         }
         confirmLabel="Delete"
         loading={saving}

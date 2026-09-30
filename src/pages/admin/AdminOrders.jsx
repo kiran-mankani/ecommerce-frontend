@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import {
-  FiSearch,
-  FiChevronLeft,
-  FiChevronRight,
-  FiEye,
-  FiTrash2,
-} from "react-icons/fi";
+import { FiSearch, FiEye, FiTrash2 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import useAdminOrders from "../../hooks/useAdminOrders";
 import {
@@ -19,6 +13,7 @@ import ErrorState from "../../components/common/ErrorState";
 import EmptyState from "../../components/common/EmptyState";
 import OrderStatusBadge from "../../components/shop/OrderStatusBadge";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
+import Pagination from "../../components/common/Pagination";
 
 const AdminOrders = () => {
   const dispatch = useDispatch();
@@ -79,7 +74,6 @@ const AdminOrders = () => {
         </p>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col gap-2 sm:flex-row">
         <form onSubmit={submitSearch} className="flex flex-1 gap-2">
           <div className="relative max-w-md flex-1">
@@ -132,7 +126,6 @@ const AdminOrders = () => {
         </select>
       </div>
 
-      {/* Content */}
       {loading && list.length === 0 ? (
         <Loader size="lg" />
       ) : error && list.length === 0 ? (
@@ -271,35 +264,20 @@ const AdminOrders = () => {
           </div>
 
           {pagination.pages > 1 && (
-            <div className="flex flex-col items-center justify-between gap-2 text-sm sm:flex-row">
-              <p style={{ color: "var(--color-text-muted)" }}>
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+              <p
+                className="text-sm"
+                style={{ color: "var(--color-text-muted)" }}
+              >
                 Page {pagination.page} of {pagination.pages} —{" "}
                 {pagination.total} total
               </p>
-              <div className="flex gap-1">
-                <button
-                  onClick={() => update({ page: pagination.page - 1 })}
-                  disabled={pagination.page <= 1 || loading}
-                  className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{
-                    borderColor: "var(--color-border)",
-                    color: "var(--color-text)",
-                  }}
-                >
-                  <FiChevronLeft size={14} /> Prev
-                </button>
-                <button
-                  onClick={() => update({ page: pagination.page + 1 })}
-                  disabled={pagination.page >= pagination.pages || loading}
-                  className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{
-                    borderColor: "var(--color-border)",
-                    color: "var(--color-text)",
-                  }}
-                >
-                  Next <FiChevronRight size={14} />
-                </button>
-              </div>
+              <Pagination
+                page={pagination.page}
+                pages={pagination.pages}
+                onChange={(p) => update({ page: p })}
+                disabled={loading}
+              />
             </div>
           )}
         </>

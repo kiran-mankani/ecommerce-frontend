@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { FiPlus, FiSearch, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiPlus, FiSearch } from "react-icons/fi";
 import toast from "react-hot-toast";
 import useProducts from "../../hooks/useProducts";
 import useCategories from "../../hooks/useCategories";
@@ -16,6 +16,7 @@ import ErrorState from "../../components/common/ErrorState";
 import ProductTable from "../../components/admin/ProductTable";
 import ProductForm from "../../components/admin/ProductForm";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
+import Pagination from "../../components/common/Pagination";
 
 const Products = () => {
   const dispatch = useDispatch();
@@ -93,7 +94,6 @@ const Products = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1
@@ -118,9 +118,8 @@ const Products = () => {
         </button>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        <div className="relative flex-1 sm:max-w-xs">
+        <div className="relative max-w-xs flex-1">
           <FiSearch
             className="absolute left-3 top-1/2 -translate-y-1/2"
             size={16}
@@ -182,7 +181,6 @@ const Products = () => {
         </select>
       </div>
 
-      {/* Content */}
       {loading && items.length === 0 ? (
         <Loader size="lg" />
       ) : error && items.length === 0 ? (
@@ -196,43 +194,25 @@ const Products = () => {
           />
 
           {pagination.pages > 1 && (
-            <div className="flex flex-col items-center justify-between gap-2 text-sm sm:flex-row">
-              <p style={{ color: "var(--color-text-muted)" }}>
-                Page {pagination.page} of {pagination.pages} — {pagination.total}{" "}
-                total
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+              <p
+                className="text-sm"
+                style={{ color: "var(--color-text-muted)" }}
+              >
+                Page {pagination.page} of {pagination.pages} —{" "}
+                {pagination.total} total
               </p>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={pagination.page <= 1 || loading}
-                  className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{
-                    borderColor: "var(--color-border)",
-                    color: "var(--color-text)",
-                  }}
-                >
-                  <FiChevronLeft size={14} /> Prev
-                </button>
-                <button
-                  onClick={() =>
-                    setPage((p) => Math.min(pagination.pages, p + 1))
-                  }
-                  disabled={pagination.page >= pagination.pages || loading}
-                  className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{
-                    borderColor: "var(--color-border)",
-                    color: "var(--color-text)",
-                  }}
-                >
-                  Next <FiChevronRight size={14} />
-                </button>
-              </div>
+              <Pagination
+                page={pagination.page}
+                pages={pagination.pages}
+                onChange={setPage}
+                disabled={loading}
+              />
             </div>
           )}
         </>
       )}
 
-      {/* Create / Edit modal */}
       {formOpen && (
         <div
           className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-3 py-6 sm:px-4 sm:py-8"
