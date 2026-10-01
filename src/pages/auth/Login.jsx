@@ -273,7 +273,8 @@ const Login = () => {
                     style={{ color: "var(--color-text-muted)" }}
                     aria-label="Toggle password"
                   >
-                    {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                    {/* ✅ FIXED: showPassword true → FiEye (click to hide), false → FiEyeOff (click to show) */}
+                    {showPassword ? <FiEye size={16} /> : <FiEyeOff size={16} />}
                   </button>
                 </div>
                 {errors.password && (
