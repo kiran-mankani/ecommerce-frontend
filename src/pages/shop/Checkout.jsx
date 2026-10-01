@@ -5,9 +5,8 @@ import { FiArrowLeft } from "react-icons/fi";
 import toast from "react-hot-toast";
 import useCart from "../../hooks/useCart";
 import useAuth from "../../hooks/useAuth";
-import useOrders from "../../hooks/useOrders";
 import { fetchCartThunk } from "../../store/slices/cartSlice";
-import { createOrderThunk } from "../../store/slices/orderSlice";
+import { createCheckoutSessionApi } from "../../services/paymentService";
 import Loader from "../../components/common/Loader";
 import EmptyState from "../../components/common/EmptyState";
 import CheckoutForm from "../../components/shop/CheckoutForm";
@@ -17,19 +16,65 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { items, subtotal, discount, total, loading } = useCart();
-  const { saving } = useOrders();
 
   useEffect(() => {
     dispatch(fetchCartThunk());
   }, [dispatch]);
 
   const handleSubmit = async (shippingAddress) => {
-    const res = await dispatch(createOrderThunk({ shippingAddress }));
-    if (createOrderThunk.fulfilled.match(res)) {
-      toast.success("Order placed");
-      navigate(`/order-success/${res.payload.data._id}`);
-    } else {
-      toast.error(res.payload || "Failed to place order");
+    try {
+      console.log("🔍 [Checkout] raw items:", items);
+      console.log("🔍 [Checkout] typeof items:", typeof items);
+      console.log("🔍 [Checkout] isArray:", Array.isArray(items));
+
+      // 🔧 Handle both `[...]` and `{ items: [...] }` shapes safely
+      const rawArray = Array.isArray(items)
+        ? items
+        : Array.isArray(items?.items)
+        ? items.items
+        : [];
+
+      console.log("🔍 [Checkout] rawArray:", rawArray);
+
+      // Build a clean array of { productId, quantity }
+      const stripeItems = rawArray
+        .map((it) => ({
+          productId:
+            it?.productId ||
+            it?.product?._id ||
+            it?.product?.id ||
+            (typeof it?.product === "string" ? it.product : null) ||
+            it?._id ||
+            it?.id,
+          quantity: Number(it?.quantity) || 1,
+        }))
+        .filter((it) => it.productId);
+
+      console.log("🔍 [Checkout] stripeItems:", stripeItems);
+
+      if (stripeItems.length === 0) {
+        toast.error("Your cart is empty");
+        return;
+      }
+
+      // ✅ Send a plain array — no wrapping
+      const res = await createCheckoutSessionApi({
+        items: stripeItems,
+        shippingAddress,
+      });
+
+      if (!res?.url) {
+        toast.error("Could not start payment. Please try again.");
+        return;
+      }
+
+      // 🚀 Redirect to Stripe-hosted Checkout page
+      window.location.href = res.url;
+    } catch (err) {
+      console.error("Checkout error:", err);
+      toast.error(
+        err?.response?.data?.error || "Payment failed. Please try again."
+      );
     }
   };
 
@@ -96,7 +141,7 @@ const Checkout = () => {
           </h2>
           <CheckoutForm
             initial={initial}
-            loading={saving}
+            loading={loading}
             onSubmit={handleSubmit}
           />
         </div>
@@ -116,16 +161,23 @@ const Checkout = () => {
           </h3>
 
           <ul className="space-y-2 text-sm">
-            {items.map((it) => (
-              <li key={it.productId} className="flex justify-between gap-3">
+            {items.map((it, idx) => (
+              <li
+                key={it.productId || it._id || idx}
+                className="flex justify-between gap-3"
+              >
                 <span
                   className="line-clamp-1"
                   style={{ color: "var(--color-text-muted)" }}
                 >
-                  {it.quantity}× {it.name}
+                  {it.quantity}× {it.name || it.product?.name || "Item"}
                 </span>
                 <span style={{ color: "var(--color-text)" }}>
-                  ${it.lineTotal.toFixed(2)}
+                  $
+                  {Number(
+                    it.lineTotal ||
+                      (it.product?.price || it.price || 0) * it.quantity
+                  ).toFixed(2)}
                 </span>
               </li>
             ))}
@@ -138,7 +190,7 @@ const Checkout = () => {
             <div className="flex justify-between">
               <span style={{ color: "var(--color-text-muted)" }}>Subtotal</span>
               <span style={{ color: "var(--color-text)" }}>
-                ${subtotal.toFixed(2)}
+                ${Number(subtotal).toFixed(2)}
               </span>
             </div>
             {discount > 0 && (
@@ -147,7 +199,7 @@ const Checkout = () => {
                   Discount
                 </span>
                 <span style={{ color: "var(--color-success)" }}>
-                  −${discount.toFixed(2)}
+                  −${Number(discount).toFixed(2)}
                 </span>
               </div>
             )}
@@ -157,7 +209,7 @@ const Checkout = () => {
             >
               <span style={{ color: "var(--color-text)" }}>Total</span>
               <span style={{ color: "var(--color-text)" }}>
-                ${total.toFixed(2)}
+                ${Number(total).toFixed(2)}
               </span>
             </div>
           </div>

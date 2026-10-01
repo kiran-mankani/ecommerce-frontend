@@ -7,7 +7,7 @@ import StockBadge from "./StockBadge";
 import { addToCartThunk } from "../../store/slices/cartSlice";
 import useAuth from "../../hooks/useAuth";
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, className = "" }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
@@ -34,13 +34,12 @@ const ProductCard = ({ product }) => {
   return (
     <Link
       to={`/product/${product._id}`}
-      className="group flex flex-col overflow-hidden rounded-xl border transition hover:shadow-lg"
+      className={`group flex h-full flex-col overflow-hidden rounded-xl border transition hover:shadow-lg ${className}`}
       style={{
         backgroundColor: "var(--color-surface)",
         borderColor: "var(--color-border)",
       }}
     >
-      {/* Image */}
       <div
         className="relative aspect-square w-full overflow-hidden"
         style={{ backgroundColor: "var(--color-surface-alt)" }}
@@ -78,7 +77,6 @@ const ProductCard = ({ product }) => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex flex-1 flex-col gap-1 p-2 sm:gap-1.5 sm:p-3 md:p-4">
         <h3
           className="line-clamp-2 text-xs font-semibold leading-snug sm:text-sm"
@@ -113,7 +111,6 @@ const ProductCard = ({ product }) => {
           />
         </div>
 
-        {/* Add to Cart — hidden for admin */}
         {!isAdmin && (
           <button
             type="button"

@@ -88,6 +88,15 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     resetCart: () => initialState,
+    // ✅ NEW — instantly reset cart state after successful Stripe payment
+    clearCart: (state) => {
+      state.items = [];
+      state.subtotal = 0;
+      state.discount = 0;
+      state.total = 0;
+      state.count = 0;
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     const apply = (state, action) => {
@@ -128,5 +137,5 @@ const cartSlice = createSlice({
   },
 });
 
-export const { resetCart } = cartSlice.actions;
+export const { resetCart, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;

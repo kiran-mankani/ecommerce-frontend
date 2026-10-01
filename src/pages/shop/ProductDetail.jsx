@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
@@ -8,11 +8,14 @@ import {
   FiMinus,
   FiPlus,
   FiZap,
+  FiChevronLeft,
+  FiChevronRight,
 } from "react-icons/fi";
 import Loader from "../../components/common/Loader";
 import ErrorState from "../../components/common/ErrorState";
 import PriceDisplay from "../../components/shop/PriceDisplay";
 import StockBadge from "../../components/shop/StockBadge";
+import RelatedProducts from "../../components/shop/RelatedProducts";
 import { getProductByIdApi } from "../../services/productService";
 import { addToCartThunk } from "../../store/slices/cartSlice";
 import useAuth from "../../hooks/useAuth";
@@ -30,6 +33,11 @@ const ProductDetail = () => {
   const [activeImg, setActiveImg] = useState(0);
   const [qty, setQty] = useState(1);
   const [adding, setAdding] = useState(false);
+
+  // Carousel state
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   const load = async () => {
     try {
@@ -50,6 +58,47 @@ const ProductDetail = () => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  const images = product?.images?.length ? product.images : [];
+
+  const goPrev = () => {
+    if (images.length < 2) return;
+    setActiveImg((i) => (i === 0 ? images.length - 1 : i - 1));
+  };
+
+  const goNext = () => {
+    if (images.length < 2) return;
+    setActiveImg((i) => (i === images.length - 1 ? 0 : i + 1));
+  };
+
+  // Keyboard arrow support
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "ArrowLeft") goPrev();
+      if (e.key === "ArrowRight") goNext();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [images.length]);
+
+  // Touch handlers for swipe
+  const onTouchStart = (e) => {
+    touchStartX.current = e.changedTouches[0].screenX;
+    touchEndX.current = e.changedTouches[0].screenX;
+    setIsDragging(true);
+  };
+  const onTouchMove = (e) => {
+    touchEndX.current = e.changedTouches[0].screenX;
+  };
+  const onTouchEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) < 40) return; // ignore small swipes
+    if (diff > 0) goNext();
+    else goPrev();
+  };
 
   const goToCart = async () => {
     if (!isAuthenticated) {
@@ -97,10 +146,10 @@ const ProductDetail = () => {
   if (error) return <ErrorState message={error} onRetry={load} />;
   if (!product) return null;
 
-  const images = product.images?.length ? product.images : [];
   const outOfStock = product.stock <= 0 || product.inStock === false;
   const maxQty = Math.max(1, product.stock || 1);
   const isLowStock = !outOfStock && product.stock <= 5;
+  const hasMultiple = images.length > 1;
 
   return (
     <div className="space-y-6">
@@ -114,20 +163,25 @@ const ProductDetail = () => {
       </button>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Gallery */}
+        {/* ================== GALLERY / CAROUSEL ================== */}
         <div className="space-y-3">
+          {/* Main image frame */}
           <div
-            className="aspect-square w-full overflow-hidden rounded-xl border"
+            className="group relative aspect-square w-full select-none overflow-hidden rounded-xl border"
             style={{
               backgroundColor: "var(--color-surface)",
               borderColor: "var(--color-border)",
             }}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
           >
             {images.length > 0 ? (
               <img
                 src={images[activeImg]}
                 alt={product.name}
-                className="h-full w-full object-cover"
+                draggable={false}
+                className="h-full w-full object-cover transition-transform duration-300"
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
                 }}
@@ -143,31 +197,96 @@ const ProductDetail = () => {
                 {product.name?.[0]?.toUpperCase() || "?"}
               </div>
             )}
+
+            {/* Prev arrow */}
+            {hasMultiple && (
+              <button
+                type="button"
+                onClick={goPrev}
+                aria-label="Previous image"
+                className="absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-md backdrop-blur transition hover:bg-white md:opacity-0 md:group-hover:opacity-100"
+                style={{ color: "var(--color-text)" }}
+              >
+                <FiChevronLeft size={18} />
+              </button>
+            )}
+
+            {/* Next arrow */}
+            {hasMultiple && (
+              <button
+                type="button"
+                onClick={goNext}
+                aria-label="Next image"
+                className="absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-md backdrop-blur transition hover:bg-white md:opacity-0 md:group-hover:opacity-100"
+                style={{ color: "var(--color-text)" }}
+              >
+                <FiChevronRight size={18} />
+              </button>
+            )}
+
+            {/* Counter badge */}
+            {hasMultiple && (
+              <span className="absolute right-2 top-2 z-10 rounded-full bg-black/60 px-2.5 py-0.5 text-[11px] font-semibold text-white">
+                {activeImg + 1} / {images.length}
+              </span>
+            )}
+
+            {/* Dot indicators (mobile-friendly) */}
+            {hasMultiple && (
+              <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
+                {images.map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setActiveImg(i)}
+                    aria-label={`Go to image ${i + 1}`}
+                    className="h-1.5 rounded-full transition-all"
+                    style={{
+                      width: i === activeImg ? 20 : 6,
+                      backgroundColor:
+                        i === activeImg
+                          ? "#ffffff"
+                          : "rgba(255, 255, 255, 0.6)",
+                      boxShadow: "0 0 4px rgba(0,0,0,0.3)",
+                    }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
-          {images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto">
-              {images.map((url, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setActiveImg(i)}
-                  className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2"
-                  style={{
-                    borderColor:
-                      i === activeImg
+          {/* Thumbnails strip */}
+          {hasMultiple && (
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {images.map((url, i) => {
+                const active = i === activeImg;
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setActiveImg(i)}
+                    aria-label={`Show image ${i + 1}`}
+                    className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition"
+                    style={{
+                      borderColor: active
                         ? "var(--color-primary)"
                         : "var(--color-border)",
-                  }}
-                >
-                  <img src={url} alt="" className="h-full w-full object-cover" />
-                </button>
-              ))}
+                      opacity: active ? 1 : 0.7,
+                    }}
+                  >
+                    <img
+                      src={url}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
 
-        {/* Info */}
+        {/* ================== INFO ================== */}
         <div className="space-y-4">
           {product.categoryId?.name && (
             <Link
@@ -201,7 +320,6 @@ const ProductDetail = () => {
             <StockBadge stock={product.stock} />
           </div>
 
-          {/* Low stock warning */}
           {isLowStock && (
             <p
               className="text-sm font-semibold"
@@ -218,10 +336,8 @@ const ProductDetail = () => {
             {product.description}
           </p>
 
-          {/* Quantity + Action buttons — hidden for admin */}
           {!isAdmin && (
             <div className="flex flex-col gap-3 pt-3">
-              {/* Quantity selector */}
               <div className="flex flex-wrap items-center gap-3">
                 <span
                   className="text-sm font-medium"
@@ -276,7 +392,6 @@ const ProductDetail = () => {
                 )}
               </div>
 
-              {/* Add to Cart + Buy Now */}
               <div className="flex flex-col gap-2 sm:flex-row">
                 <button
                   type="button"
@@ -329,6 +444,9 @@ const ProductDetail = () => {
           )}
         </div>
       </div>
+
+      {/* ================== RELATED PRODUCTS SLIDER ================== */}
+      <RelatedProducts currentProductId={product._id} />
     </div>
   );
 };

@@ -56,7 +56,10 @@ const AppRoutes = () => {
       >
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
+        {/* Old order-success (kept for backward compatibility) */}
         <Route path="/order-success/:id" element={<OrderSuccess />} />
+        {/* ✨ NEW — Stripe success page (uses ?session_id=...) */}
+        <Route path="/order-success" element={<OrderSuccess />} />
         <Route path="/orders" element={<MyOrders />} />
         <Route path="/order/:id" element={<OrderDetail />} />
       </Route>
