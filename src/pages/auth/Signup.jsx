@@ -7,7 +7,6 @@ import {
   FiLock,
   FiEye,
   FiEyeOff,
-  FiHome,
 } from "react-icons/fi";
 import {
   HiOutlineShieldCheck,
@@ -91,23 +90,15 @@ const Signup = () => {
       className="flex min-h-screen flex-col"
       style={{ backgroundColor: "var(--color-surface-alt)" }}
     >
+      {/* Header — sirf logo, no Back to Home */}
       <header
-        className="flex items-center justify-between px-6 py-4 md:px-10"
+        className="flex items-center px-6 py-4 md:px-10"
         style={{ backgroundColor: "var(--color-surface)" }}
       >
         <Link to="/" className="flex items-center gap-2">
           <span className="text-xl font-bold tracking-tight text-blue-700">
             ecommerce
           </span>
-        </Link>
-
-        <Link
-          to="/"
-          className="flex items-center gap-2 text-sm font-medium transition hover:opacity-70"
-          style={{ color: "var(--color-text-muted)" }}
-        >
-          <FiHome size={16} />
-          <span>Back to Home</span>
         </Link>
       </header>
 
@@ -313,9 +304,9 @@ const Signup = () => {
                   style={{ color: "var(--color-text-muted)" }}
                 >
                   {showPassword ? (
-                    <FiEyeOff size={16} />
-                  ) : (
                     <FiEye size={16} />
+                  ) : (
+                    <FiEyeOff size={16} />
                   )}
                 </button>
               </div>
@@ -354,9 +345,9 @@ const Signup = () => {
                   style={{ color: "var(--color-text-muted)" }}
                 >
                   {showConfirmPassword ? (
-                    <FiEyeOff size={16} />
-                  ) : (
                     <FiEye size={16} />
+                  ) : (
+                    <FiEyeOff size={16} />
                   )}
                 </button>
               </div>

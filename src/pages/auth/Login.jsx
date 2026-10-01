@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { FiMail, FiLock, FiEye, FiEyeOff, FiHome } from "react-icons/fi";
-import { FcGoogle } from "react-icons/fc";
+import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import {
   HiOutlineShieldCheck,
   HiOutlineTruck,
@@ -70,8 +69,9 @@ const Login = () => {
       className="flex min-h-screen flex-col"
       style={{ backgroundColor: "var(--color-surface-alt)" }}
     >
+      {/* Header — sirf logo, no Back to Home link */}
       <header
-        className="flex items-center justify-between px-6 py-4 md:px-10"
+        className="flex items-center px-6 py-4 md:px-10"
         style={{ backgroundColor: "var(--color-surface)" }}
       >
         <Link to="/" className="flex items-center gap-2">
@@ -81,15 +81,6 @@ const Login = () => {
           >
             ecommerce
           </span>
-        </Link>
-
-        <Link
-          to="/"
-          className="flex items-center gap-2 text-sm font-medium transition hover:opacity-70"
-          style={{ color: "var(--color-text-muted)" }}
-        >
-          <FiHome size={16} />
-          <span>Back to Home</span>
         </Link>
       </header>
 
@@ -273,7 +264,6 @@ const Login = () => {
                     style={{ color: "var(--color-text-muted)" }}
                     aria-label="Toggle password"
                   >
-                    {/* ✅ FIXED: showPassword true → FiEye (click to hide), false → FiEyeOff (click to show) */}
                     {showPassword ? <FiEye size={16} /> : <FiEyeOff size={16} />}
                   </button>
                 </div>
@@ -320,26 +310,6 @@ const Login = () => {
                 ) : (
                   <>Login <span aria-hidden>→</span></>
                 )}
-              </button>
-
-              <div className="flex items-center gap-3">
-                <span className="h-px flex-1" style={{ backgroundColor: "var(--color-divider)" }} />
-                <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>OR</span>
-                <span className="h-px flex-1" style={{ backgroundColor: "var(--color-divider)" }} />
-              </div>
-
-              <button
-                type="button"
-                onClick={() => toast("Google login coming soon")}
-                className="flex w-full items-center justify-center gap-3 rounded-lg border py-2.5 text-sm font-medium transition hover:bg-slate-50"
-                style={{
-                  borderColor: "var(--color-input-border)",
-                  color: "var(--color-text)",
-                  backgroundColor: "var(--color-surface)",
-                }}
-              >
-                <FcGoogle size={18} />
-                Continue with Google
               </button>
             </form>
 

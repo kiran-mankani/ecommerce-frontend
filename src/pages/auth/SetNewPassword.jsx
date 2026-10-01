@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { FiLock, FiHome } from "react-icons/fi";
+import { FiLock, FiEye, FiEyeOff, FiHome } from "react-icons/fi";
 import {
   HiOutlineShieldCheck,
   HiOutlineTruck,
@@ -19,6 +19,8 @@ const SetNewPassword = () => {
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -251,12 +253,13 @@ const SetNewPassword = () => {
               {/* New Password */}
               <div className="relative">
                 <FiLock
-                  className="absolute left-3 top-[42px] z-10"
+                  className="absolute left-3 top-[42px] z-10 pointer-events-none"
+                  size={16}
                   style={{ color: "var(--color-text-muted)" }}
                 />
                 <Input
                   label="New Password"
-                  type="password"
+                  type={showNew ? "text" : "password"}
                   placeholder="••••••••"
                   value={newPassword}
                   onChange={(e) => {
@@ -265,8 +268,19 @@ const SetNewPassword = () => {
                       setErrors({ ...errors, newPassword: "" });
                   }}
                   error={errors.newPassword}
-                  className="pl-10"
+                  className="pl-10 pr-10"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowNew((v) => !v)}
+                  aria-label={showNew ? "Hide password" : "Show password"}
+                  aria-pressed={showNew}
+                  title={showNew ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-[42px] z-10 rounded p-1 transition-colors hover:bg-black/5"
+                  style={{ color: "var(--color-text-muted)" }}
+                >
+                  {showNew ? <FiEye size={16} /> : <FiEyeOff size={16} />}
+                </button>
                 <p
                   className="mt-1 text-xs"
                   style={{ color: "var(--color-text-muted)" }}
@@ -279,12 +293,13 @@ const SetNewPassword = () => {
               {/* Confirm New Password */}
               <div className="relative">
                 <FiLock
-                  className="absolute left-3 top-[42px] z-10"
+                  className="absolute left-3 top-[42px] z-10 pointer-events-none"
+                  size={16}
                   style={{ color: "var(--color-text-muted)" }}
                 />
                 <Input
                   label="Confirm New Password"
-                  type="password"
+                  type={showConfirm ? "text" : "password"}
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => {
@@ -293,8 +308,19 @@ const SetNewPassword = () => {
                       setErrors({ ...errors, confirmPassword: "" });
                   }}
                   error={errors.confirmPassword}
-                  className="pl-10"
+                  className="pl-10 pr-10"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm((v) => !v)}
+                  aria-label={showConfirm ? "Hide password" : "Show password"}
+                  aria-pressed={showConfirm}
+                  title={showConfirm ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-[42px] z-10 rounded p-1 transition-colors hover:bg-black/5"
+                  style={{ color: "var(--color-text-muted)" }}
+                >
+                  {showConfirm ? <FiEye size={16} /> : <FiEyeOff size={16} />}
+                </button>
               </div>
 
               <Button type="submit" loading={loading} className="w-full">
