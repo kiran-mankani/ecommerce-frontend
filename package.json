@@ -27,7 +27,7 @@
     "swiper": "^14.3.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^6.1.1",
+   "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.6.1",
     "postcss": "^8.5.28",
     "tailwindcss": "^3.4.19",
