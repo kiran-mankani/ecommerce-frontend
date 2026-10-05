@@ -8,6 +8,7 @@ import {
   FiPackage,
   FiTag,
   FiShoppingBag,
+  FiUser,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { logoutThunk } from "../store/slices/authSlice";
@@ -18,6 +19,7 @@ const navItems = [
   { to: "/admin/products", label: "Products", icon: FiPackage },
   { to: "/admin/orders", label: "Orders", icon: FiShoppingBag },
   { to: "/admin/users", label: "Users", icon: FiUsers },
+  { to: "/admin/profile", label: "Profile", icon: FiUser },
 ];
 
 const AdminLayout = () => {
@@ -35,6 +37,7 @@ const AdminLayout = () => {
       className="flex min-h-screen flex-col"
       style={{ backgroundColor: "var(--color-surface-alt)" }}
     >
+      {/* ============ HEADER ============ */}
       <header
         className="flex items-center justify-between border-b px-3 py-2.5 sm:px-4 sm:py-3 md:px-6 lg:px-10"
         style={{
@@ -80,6 +83,7 @@ const AdminLayout = () => {
         </div>
       </header>
 
+      {/* ============ MOBILE NAV ============ */}
       <div
         className="border-b md:hidden"
         style={{
@@ -88,15 +92,12 @@ const AdminLayout = () => {
         }}
       >
         <div className="flex gap-1 overflow-x-auto px-2 py-2">
-          {navItems.map(({ to, label, icon: Icon, end, disabled }) => (
+          {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
-              to={disabled ? "#" : to}
+              to={to}
               end={end}
-              onClick={(e) => disabled && e.preventDefault()}
-              className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${
-                disabled ? "cursor-not-allowed opacity-50" : "hover:bg-slate-100"
-              }`}
+              className="flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition hover:bg-slate-100"
               style={({ isActive }) => ({
                 backgroundColor: isActive
                   ? "rgba(37, 99, 235, 0.1)"
@@ -111,7 +112,9 @@ const AdminLayout = () => {
         </div>
       </div>
 
+      {/* ============ BODY ============ */}
       <div className="flex flex-1">
+        {/* Desktop sidebar */}
         <aside
           className="hidden w-56 shrink-0 flex-col gap-1 border-r p-3 md:flex lg:w-64 lg:p-4"
           style={{
@@ -119,15 +122,12 @@ const AdminLayout = () => {
             borderColor: "var(--color-border)",
           }}
         >
-          {navItems.map(({ to, label, icon: Icon, end, disabled }) => (
+          {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
-              to={disabled ? "#" : to}
+              to={to}
               end={end}
-              onClick={(e) => disabled && e.preventDefault()}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
-                disabled ? "cursor-not-allowed opacity-50" : "hover:bg-slate-100"
-              }`}
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition hover:bg-slate-100"
               style={({ isActive }) => ({
                 backgroundColor: isActive
                   ? "rgba(37, 99, 235, 0.1)"
@@ -137,18 +137,11 @@ const AdminLayout = () => {
             >
               <Icon size={16} />
               <span className="truncate">{label}</span>
-              {disabled && (
-                <span
-                  className="ml-auto text-[10px] uppercase"
-                  style={{ color: "var(--color-text-muted)" }}
-                >
-                  Soon
-                </span>
-              )}
             </NavLink>
           ))}
         </aside>
 
+        {/* Content */}
         <main className="min-w-0 flex-1 p-3 sm:p-4 md:p-6 lg:p-8">
           <Outlet />
         </main>

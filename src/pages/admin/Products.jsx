@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { FiPlus, FiSearch } from "react-icons/fi";
+import { FiPlus, FiSearch, FiChevronDown } from "react-icons/fi";
 import toast from "react-hot-toast";
 import useProducts from "../../hooks/useProducts";
 import useCategories from "../../hooks/useCategories";
@@ -17,6 +17,32 @@ import ProductTable from "../../components/admin/ProductTable";
 import ProductForm from "../../components/admin/ProductForm";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import Pagination from "../../components/common/Pagination";
+
+/* ------------------------------------------------------------
+   Styled Select — prevents text clipping
+   ------------------------------------------------------------ */
+const StyledSelect = ({ value, onChange, children, minWidth = "160px" }) => (
+  <div className="relative" style={{ minWidth }}>
+    <select
+      value={value}
+      onChange={onChange}
+      className="w-full cursor-pointer appearance-none rounded-lg border py-2.5 pl-3 pr-9 text-sm font-medium outline-none transition focus:ring-2"
+      style={{
+        backgroundColor: "var(--color-surface)",
+        borderColor: "var(--color-input-border)",
+        color: "var(--color-text)",
+      }}
+    >
+      {children}
+    </select>
+    {/* Custom chevron (native select arrows look inconsistent) */}
+    <FiChevronDown
+      size={16}
+      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+      style={{ color: "var(--color-text-muted)" }}
+    />
+  </div>
+);
 
 const Products = () => {
   const dispatch = useDispatch();
@@ -94,6 +120,7 @@ const Products = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1
@@ -118,8 +145,10 @@ const Products = () => {
         </button>
       </div>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        <div className="relative max-w-xs flex-1">
+      {/* Filters */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        {/* Search */}
+        <div className="relative max-w-xs flex-1 sm:min-w-[220px]">
           <FiSearch
             className="absolute left-3 top-1/2 -translate-y-1/2"
             size={16}
@@ -141,18 +170,14 @@ const Products = () => {
           />
         </div>
 
-        <select
+        {/* Category filter */}
+        <StyledSelect
           value={categoryFilter}
           onChange={(e) => {
             setCategoryFilter(e.target.value);
             setPage(1);
           }}
-          className="rounded-lg border px-3 py-2.5 text-sm outline-none focus:ring-2"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            borderColor: "var(--color-input-border)",
-            color: "var(--color-text)",
-          }}
+          minWidth="180px"
         >
           <option value="">All categories</option>
           {categories.map((c) => (
@@ -160,27 +185,24 @@ const Products = () => {
               {c.name}
             </option>
           ))}
-        </select>
+        </StyledSelect>
 
-        <select
+        {/* Status filter */}
+        <StyledSelect
           value={statusFilter}
           onChange={(e) => {
             setStatusFilter(e.target.value);
             setPage(1);
           }}
-          className="rounded-lg border px-3 py-2.5 text-sm outline-none focus:ring-2"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            borderColor: "var(--color-input-border)",
-            color: "var(--color-text)",
-          }}
+          minWidth="160px"
         >
           <option value="">All statuses</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
-        </select>
+        </StyledSelect>
       </div>
 
+      {/* Table */}
       {loading && items.length === 0 ? (
         <Loader size="lg" />
       ) : error && items.length === 0 ? (
@@ -213,6 +235,7 @@ const Products = () => {
         </>
       )}
 
+      {/* Create/Edit Form Modal */}
       {formOpen && (
         <div
           className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-3 py-6 sm:px-4 sm:py-8"
@@ -233,6 +256,7 @@ const Products = () => {
         </div>
       )}
 
+      {/* Delete Confirm */}
       <ConfirmDialog
         open={!!deleting}
         title="Delete product?"

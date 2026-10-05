@@ -67,6 +67,32 @@ const initialState = {
   error: null,
 };
 
+/* 🔑 Helper — safely extract items + pagination from any response shape */
+const extractListPayload = (payload, currentPagination) => {
+  const p = payload || {};
+  const d = p.data || p;
+
+  // Try common keys in order
+  const items =
+    d.items ||
+    d.products ||
+    d.results ||
+    (Array.isArray(d) ? d : []) ||
+    [];
+
+  const pagination =
+    d.pagination ||
+    p.pagination ||
+    {
+      page: 1,
+      limit: 10,
+      total: items.length,
+      pages: 1,
+    };
+
+  return { items, pagination };
+};
+
 const productSlice = createSlice({
   name: "product",
   initialState,
@@ -74,22 +100,44 @@ const productSlice = createSlice({
     clearProductError: (state) => {
       state.error = null;
     },
+
+    // 🔑 Update stock after checkout
+    updateProductStock: (state, action) => {
+      const updates = action.payload; // [{ productId, name, newStock }]
+      if (!Array.isArray(updates)) return;
+
+      for (const update of updates) {
+        const product = state.items.find(
+          (p) => String(p._id) === String(update.productId)
+        );
+        if (product) {
+          product.stock = update.newStock;
+        }
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
+      // ---------- FETCH ----------
       .addCase(fetchProductsThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchProductsThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload.data.items;
-        state.pagination = action.payload.data.pagination;
+        const { items, pagination } = extractListPayload(
+          action.payload,
+          state.pagination
+        );
+        state.items = items;
+        state.pagination = pagination;
       })
       .addCase(fetchProductsThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
+
+      // ---------- CREATE ----------
       .addCase(createProductThunk.pending, (state) => {
         state.saving = true;
       })
@@ -100,6 +148,8 @@ const productSlice = createSlice({
         state.saving = false;
         state.error = action.payload;
       })
+
+      // ---------- UPDATE ----------
       .addCase(updateProductThunk.pending, (state) => {
         state.saving = true;
       })
@@ -110,6 +160,8 @@ const productSlice = createSlice({
         state.saving = false;
         state.error = action.payload;
       })
+
+      // ---------- DELETE ----------
       .addCase(deleteProductThunk.pending, (state) => {
         state.saving = true;
       })
@@ -125,5 +177,5 @@ const productSlice = createSlice({
   },
 });
 
-export const { clearProductError } = productSlice.actions;
+export const { clearProductError, updateProductStock } = productSlice.actions;
 export default productSlice.reducer;

@@ -3,13 +3,10 @@ import { Link } from "react-router-dom";
 import { FiMinus, FiPlus, FiTrash2 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import ProductImage from "../common/ProductImage";
-import {
-  updateCartItemThunk,
-  removeCartItemThunk,
-} from "../../store/slices/cartSlice";
+import { updateCartItemThunk } from "../../store/slices/cartSlice";
 import useCart from "../../hooks/useCart";
 
-const CartItem = ({ item }) => {
+const CartItem = ({ item, onRemoveClick }) => {   // 🆕 add onRemoveClick prop
   const dispatch = useDispatch();
   const { saving } = useCart();
 
@@ -20,7 +17,6 @@ const CartItem = ({ item }) => {
     if (qty < 1) return;
 
     if (qty > item.stock) {
-      // Show how many are left in stock
       toast.error(`Only ${item.stock} left in stock`, {
         id: `stock-${item.productId}`,
       });
@@ -38,14 +34,10 @@ const CartItem = ({ item }) => {
     }
   };
 
-  const remove = async () => {
-    const res = await dispatch(removeCartItemThunk(item.productId));
-    if (removeCartItemThunk.fulfilled.match(res)) {
-      toast.success("Removed", { id: `remove-${item.productId}` });
-    } else {
-      toast.error(res.payload || "Failed to remove", {
-        id: `remove-${item.productId}`,
-      });
+  // 🆕 This now opens the parent's dialog instead of deleting directly
+  const handleRemoveClick = () => {
+    if (onRemoveClick) {
+      onRemoveClick(item.productId);
     }
   };
 
@@ -76,9 +68,10 @@ const CartItem = ({ item }) => {
             {item.name}
           </Link>
 
+          {/* 🆕 Trash button now triggers parent dialog */}
           <button
             type="button"
-            onClick={remove}
+            onClick={handleRemoveClick}
             disabled={saving}
             className="rounded-lg p-1.5 transition hover:bg-red-50 disabled:opacity-50"
             style={{ color: "var(--color-danger)" }}
@@ -103,7 +96,10 @@ const CartItem = ({ item }) => {
         )}
 
         {!outOfStock && atMax && (
-          <p className="text-xs font-semibold" style={{ color: "var(--color-warning)" }}>
+          <p
+            className="text-xs font-semibold"
+            style={{ color: "var(--color-warning)" }}
+          >
             Only {item.stock} left — max reached
           </p>
         )}

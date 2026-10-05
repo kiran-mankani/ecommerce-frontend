@@ -83,29 +83,39 @@ const initialState = {
   error: null,
 };
 
+const emptyCartState = {
+  items: [],
+  subtotal: 0,
+  discount: 0,
+  total: 0,
+  count: 0,
+  error: null,
+};
+
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
     resetCart: () => initialState,
-    // ✅ NEW — instantly reset cart state after successful Stripe payment
+
+    // 🔑 Local-only clear (instant reset, no backend call)
+    // Used only as an emergency fallback
     clearCart: (state) => {
-      state.items = [];
-      state.subtotal = 0;
-      state.discount = 0;
-      state.total = 0;
-      state.count = 0;
-      state.error = null;
+      Object.assign(state, emptyCartState);
     },
   },
   extraReducers: (builder) => {
+    // 🔑 Helper: safely extract cart data from various payload shapes
     const apply = (state, action) => {
-      const d = action.payload.data;
-      state.items = d.items;
-      state.subtotal = d.subtotal;
-      state.discount = d.discount;
-      state.total = d.total;
-      state.count = d.count;
+      const payload = action.payload;
+      // Backend might return: { data: {...} } OR { items: [...], ... } OR null
+      const d = payload?.data || payload || {};
+
+      state.items = d.items || [];
+      state.subtotal = Number(d.subtotal) || 0;
+      state.discount = Number(d.discount) || 0;
+      state.total = Number(d.total) || 0;
+      state.count = Number(d.count) || (d.items?.length ?? 0);
       state.loading = false;
       state.saving = false;
       state.error = null;
@@ -133,7 +143,20 @@ const cartSlice = createSlice({
 
       .addCase(updateCartItemThunk.fulfilled, apply)
       .addCase(removeCartItemThunk.fulfilled, apply)
-      .addCase(clearCartThunk.fulfilled, apply);
+
+      // 🔑 CLEAR CART — force empty state regardless of backend response shape
+      .addCase(clearCartThunk.pending, (state) => {
+        state.saving = true;
+      })
+      .addCase(clearCartThunk.fulfilled, (state) => {
+        Object.assign(state, emptyCartState);
+        state.saving = false;
+        state.loading = false;
+      })
+      .addCase(clearCartThunk.rejected, (state, action) => {
+        state.saving = false;
+        state.error = action.payload;
+      });
   },
 });
 

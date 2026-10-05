@@ -6,6 +6,8 @@ import {
   uploadAvatarApi,
 } from "../../services/userService";
 
+/* -------------------- THUNKS -------------------- */
+
 export const fetchProfileThunk = createAsyncThunk(
   "user/fetchProfile",
   async (_, { rejectWithValue }) => {
@@ -45,6 +47,7 @@ export const changePasswordThunk = createAsyncThunk(
   }
 );
 
+// ✅ THE EXPORT THAT WAS MISSING / BROKEN
 export const uploadAvatarThunk = createAsyncThunk(
   "user/uploadAvatar",
   async (file, { rejectWithValue }) => {
@@ -58,6 +61,8 @@ export const uploadAvatarThunk = createAsyncThunk(
   }
 );
 
+/* -------------------- STATE -------------------- */
+
 const initialState = {
   profile: null,
   loading: false,
@@ -65,6 +70,8 @@ const initialState = {
   error: null,
   successMessage: null,
 };
+
+/* -------------------- SLICE -------------------- */
 
 const userSlice = createSlice({
   name: "user",
@@ -77,6 +84,7 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      /* ---------- FETCH PROFILE ---------- */
       .addCase(fetchProfileThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -90,6 +98,7 @@ const userSlice = createSlice({
         state.error = action.payload;
       })
 
+      /* ---------- UPDATE PROFILE ---------- */
       .addCase(updateProfileThunk.pending, (state) => {
         state.saving = true;
         state.error = null;
@@ -105,6 +114,7 @@ const userSlice = createSlice({
         state.error = action.payload;
       })
 
+      /* ---------- CHANGE PASSWORD ---------- */
       .addCase(changePasswordThunk.pending, (state) => {
         state.saving = true;
         state.error = null;
@@ -119,6 +129,7 @@ const userSlice = createSlice({
         state.error = action.payload;
       })
 
+      /* ---------- UPLOAD AVATAR ---------- */
       .addCase(uploadAvatarThunk.pending, (state) => {
         state.saving = true;
         state.error = null;

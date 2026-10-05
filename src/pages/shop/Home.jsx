@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation } from "react-router-dom";
 import { FiFilter, FiX } from "react-icons/fi";
 import useProducts from "../../hooks/useProducts";
 import useCategories from "../../hooks/useCategories";
@@ -15,6 +15,7 @@ import Pagination from "../../components/shop/Pagination";
 
 const Home = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const { items, pagination, loading, error } = useProducts();
   const { items: categories } = useCategories();
 
@@ -50,7 +51,9 @@ const Home = () => {
     setParams(next);
   };
 
+  // 🔑 SINGLE useEffect — refetches BOTH products and categories
   useEffect(() => {
+    // Fetch products
     dispatch(
       fetchProductsThunk({
         search,
@@ -60,27 +63,28 @@ const Home = () => {
         limit: 12,
       })
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paramsKey, dispatch]);
 
-  useEffect(() => {
-    if (categories.length === 0) {
-      dispatch(fetchCategoriesThunk({ page: 1, limit: 100, status: "active" }));
-    }
+    // 🔑 Fetch categories EVERY time — no more caching guard
+    dispatch(
+      fetchCategoriesThunk({
+        page: 1,
+        limit: 100,
+        status: "active",
+      })
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [paramsKey, location.key, dispatch]);
 
   const activeCategoryName =
     categories.find((c) => c._id === category)?.name || "";
 
-  // Filters panel — reusable for both desktop sidebar and mobile drawer
   const filtersPanel = (
     <ProductFilters
       categories={categories}
       activeCategory={category}
       onCategoryChange={(id) => {
         update({ category: id });
-        setShowMobileFilters(false); // close drawer on mobile after select
+        setShowMobileFilters(false);
       }}
       onClearAll={() => {
         setParams(new URLSearchParams());
@@ -115,7 +119,7 @@ const Home = () => {
         />
       </div>
 
-      {/* Mobile Filters Toggle Button */}
+      {/* Mobile Filters Toggle */}
       <button
         type="button"
         onClick={() => setShowMobileFilters(true)}
@@ -147,13 +151,10 @@ const Home = () => {
       {/* Mobile Drawer */}
       {showMobileFilters && (
         <div className="fixed inset-0 z-50 md:hidden">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => setShowMobileFilters(false)}
           />
-
-          {/* Drawer Panel */}
           <div
             className="absolute right-0 top-0 h-full w-80 max-w-[85%] overflow-y-auto p-4 shadow-xl"
             style={{ backgroundColor: "var(--color-surface)" }}
@@ -175,7 +176,6 @@ const Home = () => {
                 <FiX size={20} />
               </button>
             </div>
-
             {filtersPanel}
           </div>
         </div>
@@ -183,12 +183,9 @@ const Home = () => {
 
       {/* Layout */}
       <div className="grid gap-6 md:grid-cols-[240px_1fr]">
-        {/* Desktop Sidebar Filters */}
         <div className="hidden md:block">{filtersPanel}</div>
 
-        {/* Main */}
         <div className="space-y-5">
-          {/* Desktop search + active filter */}
           <div className="hidden items-center gap-3 md:flex">
             <div className="flex-1">
               <ProductSearchBar
@@ -232,7 +229,8 @@ const Home = () => {
                 className="text-xs"
                 style={{ color: "var(--color-text-muted)" }}
               >
-                {pagination.total} product{pagination.total === 1 ? "" : "s"} found
+                {pagination.total} product
+                {pagination.total === 1 ? "" : "s"} found
               </p>
 
               <ProductGrid items={items} />

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { FiArrowLeft, FiTrash2, FiAlertTriangle } from "react-icons/fi";
@@ -7,11 +7,13 @@ import useCart from "../../hooks/useCart";
 import {
   fetchCartThunk,
   clearCartThunk,
+  removeCartItemThunk,   // ✅ Correct name from your slice
 } from "../../store/slices/cartSlice";
 import Loader from "../../components/common/Loader";
 import ErrorState from "../../components/common/ErrorState";
 import EmptyState from "../../components/common/EmptyState";
 import CartItem from "../../components/shop/CartItem";
+import ConfirmDialog from "../../components/common/ConfirmDialog";  // 🆕
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -19,14 +21,51 @@ const Cart = () => {
   const { items, subtotal, discount, total, count, loading, saving, error } =
     useCart();
 
+  // 🆕 Dialog state
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteAction, setDeleteAction] = useState({ type: null, id: null });
+
   useEffect(() => {
     dispatch(fetchCartThunk());
   }, [dispatch]);
 
-  const handleClear = async () => {
-    const res = await dispatch(clearCartThunk());
-    if (clearCartThunk.fulfilled.match(res)) toast.success("Cart cleared");
-    else toast.error(res.payload || "Failed to clear");
+  // 🆕 Open dialog — single item
+  const handleRemoveClick = (productId) => {
+    setDeleteAction({ type: "single", id: productId });
+    setDialogOpen(true);
+  };
+
+  // 🆕 Open dialog — clear cart
+  const handleClearCartClick = () => {
+    setDeleteAction({ type: "all", id: null });
+    setDialogOpen(true);
+  };
+
+  // 🆕 Confirm deletion
+  const handleConfirmDelete = async () => {
+    if (deleteAction.type === "single") {
+      const res = await dispatch(removeCartItemThunk(deleteAction.id));
+      if (removeCartItemThunk.fulfilled.match(res)) {
+        toast.success("Item removed");
+      } else {
+        toast.error(res.payload || "Failed to remove");
+      }
+    } else if (deleteAction.type === "all") {
+      const res = await dispatch(clearCartThunk());
+      if (clearCartThunk.fulfilled.match(res)) {
+        toast.success("Cart cleared");
+      } else {
+        toast.error(res.payload || "Failed to clear");
+      }
+    }
+    setDialogOpen(false);
+    setDeleteAction({ type: null, id: null });
+  };
+
+  // 🆕 Cancel dialog
+  const handleCancelDelete = () => {
+    setDialogOpen(false);
+    setDeleteAction({ type: null, id: null });
   };
 
   const handleCheckout = () => {
@@ -109,14 +148,19 @@ const Cart = () => {
               </div>
             )}
 
+            {/* 🆕 Pass onRemoveClick */}
             {items.map((it) => (
-              <CartItem key={it.productId} item={it} />
+              <CartItem
+                key={it.productId}
+                item={it}
+                onRemoveClick={handleRemoveClick}
+              />
             ))}
 
             <div className="flex justify-end pt-2">
               <button
                 type="button"
-                onClick={handleClear}
+                onClick={handleClearCartClick}   // 🆕 opens dialog
                 disabled={saving}
                 className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-red-50 disabled:opacity-60"
                 style={{
@@ -195,6 +239,24 @@ const Cart = () => {
           </aside>
         </div>
       )}
+
+      {/* 🆕 CONFIRM DIALOG */}
+      <ConfirmDialog
+        isOpen={dialogOpen}
+        title={
+          deleteAction.type === "all" ? "Clear entire cart?" : "Remove item?"
+        }
+        message={
+          deleteAction.type === "all"
+            ? "Are you sure you want to remove all items from your cart? This action cannot be undone."
+            : "Are you sure you want to remove this item from your cart?"
+        }
+        confirmText={
+          deleteAction.type === "all" ? "Yes, Clear Cart" : "Yes, Remove"
+        }
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 };

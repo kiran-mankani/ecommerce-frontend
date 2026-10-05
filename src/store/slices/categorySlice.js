@@ -67,6 +67,31 @@ const initialState = {
   error: null,
 };
 
+/* 🔑 Helper — safely extract items + pagination from any response shape */
+const extractListPayload = (payload) => {
+  const p = payload || {};
+  const d = p.data || p;
+
+  const items =
+    d.items ||
+    d.categories ||
+    d.results ||
+    (Array.isArray(d) ? d : []) ||
+    [];
+
+  const pagination =
+    d.pagination ||
+    p.pagination ||
+    {
+      page: 1,
+      limit: 10,
+      total: items.length,
+      pages: 1,
+    };
+
+  return { items, pagination };
+};
+
 const categorySlice = createSlice({
   name: "category",
   initialState,
@@ -77,21 +102,23 @@ const categorySlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // FETCH
+      // ---------- FETCH ----------
       .addCase(fetchCategoriesThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchCategoriesThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload.data.items;
-        state.pagination = action.payload.data.pagination;
+        const { items, pagination } = extractListPayload(action.payload);
+        state.items = items;
+        state.pagination = pagination;
       })
       .addCase(fetchCategoriesThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      // CREATE
+
+      // ---------- CREATE ----------
       .addCase(createCategoryThunk.pending, (state) => {
         state.saving = true;
       })
@@ -102,22 +129,26 @@ const categorySlice = createSlice({
         state.saving = false;
         state.error = action.payload;
       })
-      // UPDATE
+
+      // ---------- UPDATE ----------
       .addCase(updateCategoryThunk.pending, (state) => {
         state.saving = true;
       })
       .addCase(updateCategoryThunk.fulfilled, (state, action) => {
         state.saving = false;
-        const updated = action.payload.data;
-        state.items = state.items.map((c) =>
-          c._id === updated._id ? updated : c
-        );
+        const updated = action.payload?.data || action.payload;
+        if (updated?._id) {
+          state.items = state.items.map((c) =>
+            c._id === updated._id ? updated : c
+          );
+        }
       })
       .addCase(updateCategoryThunk.rejected, (state, action) => {
         state.saving = false;
         state.error = action.payload;
       })
-      // DELETE
+
+      // ---------- DELETE ----------
       .addCase(deleteCategoryThunk.pending, (state) => {
         state.saving = true;
       })

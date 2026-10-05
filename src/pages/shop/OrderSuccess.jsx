@@ -2,7 +2,8 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { FiCheckCircle, FiPackage, FiXCircle } from "react-icons/fi";
-import { clearCart } from "../../store/slices/cartSlice";
+import { clearCartThunk } from "../../store/slices/cartSlice";
+import { updateProductStock } from "../../store/slices/productSlice";
 import { verifyCheckoutSessionApi } from "../../services/paymentService";
 import Loader from "../../components/common/Loader";
 
@@ -13,12 +14,10 @@ const OrderSuccess = () => {
 
   const sessionId = searchParams.get("session_id");
 
-  // Stripe-specific state
   const [verifying, setVerifying] = useState(Boolean(sessionId));
   const [paid, setPaid] = useState(false);
   const [error, setError] = useState(null);
 
-  // Verify the Stripe session once on mount
   useEffect(() => {
     if (!sessionId) return;
 
@@ -33,8 +32,22 @@ const OrderSuccess = () => {
 
         if (res?.paid) {
           setPaid(true);
-          // ✅ Clear cart and reset total to 0
-          dispatch(clearCart());
+
+          // 🔑 1. Clear cart on BACKEND + Redux
+          const clearRes = await dispatch(clearCartThunk());
+          if (clearCartThunk.fulfilled.match(clearRes)) {
+            console.log("✅ Cart cleared on backend & frontend");
+          } else {
+            console.warn("⚠️ Failed to clear cart:", clearRes.payload);
+          }
+
+          // 🔑 2. Update product stock in Redux using backend's response
+          if (res.updatedProducts?.length) {
+            dispatch(updateProductStock(res.updatedProducts));
+            console.log("📦 Product stock updated:", res.updatedProducts);
+          } else {
+            console.log("ℹ️ No product stock changes returned");
+          }
         } else {
           setError("Payment not completed");
         }
@@ -167,10 +180,7 @@ const OrderSuccess = () => {
         <FiCheckCircle size={36} />
       </div>
 
-      <h1
-        className="text-2xl font-bold"
-        style={{ color: "var(--color-text)" }}
-      >
+      <h1 className="text-2xl font-bold" style={{ color: "var(--color-text)" }}>
         Order Placed!
       </h1>
       <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
