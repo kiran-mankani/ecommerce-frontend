@@ -27,7 +27,7 @@ const ProductSearchBar = ({ initial = "", onChange }) => {
       <input
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Search products..."
+        placeholder="Search..."
         className="w-full rounded-lg border py-2.5 pl-10 pr-10 text-sm outline-none focus:ring-2"
         style={{
           backgroundColor: "var(--color-surface)",
